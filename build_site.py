@@ -174,7 +174,7 @@ def page(title, body, canonical, description, article=False):
 <meta property="og:title" content="{html.escape(title, quote=True)}"><meta property="og:description" content="{html.escape(description, quote=True)}"><meta property="og:url" content="{canonical}">
 <meta property="og:image" content="{og_image}"><meta name="twitter:card" content="summary_large_image">
 <style>{CSS}</style></head><body><a class="skip" href="#content">Skip to content</a>
-<nav class="site-nav" aria-label="Site"><a href="/articles/">ArticleLog</a><a href="{REPO}">Simulation repository</a><a href="/">Earlier chart demo</a></nav>
+<nav class="site-nav" aria-label="Site"><a href="/">Home</a><a href="/articles/">ArticleLog</a><a href="{REPO}">Simulation repository</a></nav>
 <main id="content">{body}</main></body></html>'''
 
 
@@ -200,8 +200,9 @@ def build():
     description = 'Why long-running agents lose their cache, not their history—and when keeping it warm is worth paying for. An exploratory simulation with public coding-agent traces.'
     (ARTICLE / 'index.html').write_text(page(TITLE, body, URL, description, True), encoding='utf-8')
     index_body = f'''<div class="kicker">Dinesh · Technical writing</div><h1>ArticleLog</h1><p>Investigations into AI systems, agent workflows and the costs behind them.</p>
-    <p class="meta">1 published article · Next entry: 002</p><article class="entry"><div class="meta">001 · 16 October 2026 · Exploratory simulation</div><h2><a href="001-agent-cache-economics/">{html.escape(TITLE)}</a></h2><p>{description}</p><p><a href="001-agent-cache-economics/">Read the article →</a></p></article>'''
+    <p class="meta">1 published article · Next entry: 002</p><article class="entry"><div class="meta">001 · 16 October 2026 · Exploratory simulation</div><h2><a href="/articles/001-agent-cache-economics/">{html.escape(TITLE)}</a></h2><p>{description}</p><p><a href="/articles/001-agent-cache-economics/">Read the article →</a></p></article>'''
     (ROOT / 'articles/index.html').write_text(page('ArticleLog', index_body, 'https://dineshdivi2.github.io/articles/', 'Technical articles by Dinesh.'), encoding='utf-8')
+    (ROOT / 'index.html').write_text(page('ArticleLog', index_body, 'https://dineshdivi2.github.io/', 'Technical articles by Dinesh.'), encoding='utf-8')
     (ROOT / 'articles/index.json').write_text(json.dumps({'series':'ArticleLog','published_count':1,'next_number':2,'entries':[{'number':1,'title':TITLE,'published_at':'2026-10-16','url':URL,'repository_url':REPO}]},indent=2),encoding='utf-8')
     print(json.dumps({'article':str(ARTICLE/'index.html'),'figures':len(CAPTIONS),'words':words,'title':TITLE}))
 

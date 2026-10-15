@@ -1,10 +1,10 @@
-# Articles and earlier chart demo
+# ArticleLog
 
 - [ArticleLog index](https://dineshdivi2.github.io/articles/)
 - [ArticleLog 001: The 88-Hour Cache Problem](https://dineshdivi2.github.io/articles/001-agent-cache-economics/)
 - [Simulation repository](https://github.com/dineshdivi2/swarm-kv-economics)
 
-The original root chart demo remains in place, with links to the article section added above it.
+The homepage and `/articles/` show the ArticleLog index. The earlier Google chart embed has been removed.
 
 ## Build
 
