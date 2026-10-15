@@ -1,0 +1,132 @@
+{
+ "S8 scheduled": {
+  "lasts ~1 h": {
+   "passive_vs_nocache_pct": 37.82819694915255,
+   "keepalive_vs_passive_pct": 79.64357740899281,
+   "guarantee_vs_passive_pct": 91.4038228862145,
+   "passive_usd": 1694.67900756
+  },
+  "lasts ~6 h": {
+   "passive_vs_nocache_pct": 91.36135208012327,
+   "keepalive_vs_passive_pct": 24.800812350448147,
+   "guarantee_vs_passive_pct": 38.13385665611194,
+   "passive_usd": 235.47226500000005
+  },
+  "lasts ~24 h": {
+   "passive_vs_nocache_pct": 92.5797542835131,
+   "keepalive_vs_passive_pct": 18.69727329746931,
+   "guarantee_vs_passive_pct": 27.97545378840855,
+   "passive_usd": 202.26105774000004
+  },
+  "lasts 72 h (paper floor)": {
+   "passive_vs_nocache_pct": 93.79644067796609,
+   "keepalive_vs_passive_pct": 4.781778015432833,
+   "guarantee_vs_passive_pct": 13.849484986749017,
+   "passive_usd": 169.09662000000003
+  }
+ },
+ "S1 mass swarm": {
+  "lasts ~1 h": {
+   "passive_vs_nocache_pct": 82.63125338198368,
+   "keepalive_vs_passive_pct": 38.9579646115566,
+   "guarantee_vs_passive_pct": 48.62147098434647,
+   "passive_usd": 1349.07588225
+  },
+  "lasts ~6 h": {
+   "passive_vs_nocache_pct": 90.19921804365785,
+   "keepalive_vs_passive_pct": 1.6013665753602044,
+   "guarantee_vs_passive_pct": 8.948014958967583,
+   "passive_usd": 761.2523145900002
+  },
+  "lasts ~24 h": {
+   "passive_vs_nocache_pct": 90.38684600594728,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 7.170877255127203,
+   "passive_usd": 746.67876105
+  },
+  "lasts 72 h (paper floor)": {
+   "passive_vs_nocache_pct": 90.38684600594728,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 7.170877255127203,
+   "passive_usd": 746.67876105
+  }
+ },
+ "S3 coordinator": {
+  "lasts ~1 h": {
+   "passive_vs_nocache_pct": 90.62074656961103,
+   "keepalive_vs_passive_pct": 9.500265669721308,
+   "guarantee_vs_passive_pct": 33.92456102472138,
+   "passive_usd": 679.32579639
+  },
+  "lasts ~6 h": {
+   "passive_vs_nocache_pct": 92.91933409194294,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 12.474575736140562,
+   "passive_usd": 512.8424178600002
+  },
+  "lasts ~24 h": {
+   "passive_vs_nocache_pct": 92.95686536211907,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 12.00817256280637,
+   "passive_usd": 510.12408210000007
+  },
+  "lasts 72 h (paper floor)": {
+   "passive_vs_nocache_pct": 92.95754850053447,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 11.999637097909277,
+   "passive_usd": 510.07460337000015
+  }
+ },
+ "S6 Copilot sessions": {
+  "lasts ~1 h": {
+   "passive_vs_nocache_pct": 92.89182164135654,
+   "keepalive_vs_passive_pct": 0.19993841218903086,
+   "guarantee_vs_passive_pct": 17.72478631561118,
+   "passive_usd": 271.99774507854005
+  },
+  "lasts ~6 h": {
+   "passive_vs_nocache_pct": 93.21714207993035,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 13.778690301958516,
+   "passive_usd": 259.54920745674
+  },
+  "lasts ~24 h": {
+   "passive_vs_nocache_pct": 93.30271678133994,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 12.676995391999332,
+   "passive_usd": 256.27465177668006
+  },
+  "lasts 72 h (paper floor)": {
+   "passive_vs_nocache_pct": 93.303517272968,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 12.666556877188624,
+   "passive_usd": 256.2440205928801
+  }
+ },
+ "S6 TraceLab sessions": {
+  "lasts ~1 h": {
+   "passive_vs_nocache_pct": 94.90763041606655,
+   "keepalive_vs_passive_pct": 1.4768750158329813,
+   "guarantee_vs_passive_pct": 28.92243284827565,
+   "passive_usd": 879.7542058176001
+  },
+  "lasts ~6 h": {
+   "passive_vs_nocache_pct": 95.29352025548917,
+   "keepalive_vs_passive_pct": 0.23058298840165162,
+   "guarantee_vs_passive_pct": 23.09469907193926,
+   "passive_usd": 813.0881471942403
+  },
+  "lasts ~24 h": {
+   "passive_vs_nocache_pct": 95.46915719150368,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 20.113485203087162,
+   "passive_usd": 782.7452330343601
+  },
+  "lasts 72 h (paper floor)": {
+   "passive_vs_nocache_pct": 95.51183217761205,
+   "keepalive_vs_passive_pct": 0.0,
+   "guarantee_vs_passive_pct": 19.353897762484067,
+   "passive_usd": 775.3727322970801
+  }
+ }
+}

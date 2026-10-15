@@ -1,0 +1,127 @@
+{
+ "bill": {
+  "tokens": {
+   "prompt": 24852117502.0,
+   "cached": 21937451161.0,
+   "miss": 2914666341.0,
+   "new_content": 915342199.0,
+   "already_sent": 1999324142.0,
+   "output": 231817724.0
+  },
+  "usd": {
+   "Missed, already sent earlier in the session": 9996.62071,
+   "Missed, genuinely new content": 4576.710995,
+   "Cache hits": 4387.4902322,
+   "Output": 4636.35448
+  },
+  "total_usd": 23597.176417200004,
+  "avoidable_usd": 9596.7558816,
+  "miss_share_of_bill": 0.617587945580535,
+  "already_sent_share_of_misses": 0.6859530073394429,
+  "avoidable_share_of_bill": 0.4066908562248539,
+  "sessions": 9534,
+  "calls": 344134,
+  "total_usd_base": 20682.5100762,
+  "miss_share_base": 0.5636968298841051,
+  "avoidable_usd_base": 7597.4317396,
+  "avoidable_share_base": 0.3673360589023765
+ },
+ "restore": {
+  "large_gib": 30.517578125,
+  "large_gb": 32.768,
+  "small_mb": 89.0,
+  "seconds": {
+   "Large KV: read back at 10 Gbps": 26.2144,
+   "Large KV: read back from local NVMe (7 GB/s)": 4.6811428571428575,
+   "Large KV: recompute on 8 GPUs (estimate)": 5.0,
+   "Compact KV: read back at 10 Gbps": 0.0712,
+   "Compact KV: read back from local NVMe": 0.012714285714285714
+  }
+ },
+ "guarantee_vs_keepalive": {
+  "S6-copilot|5 min TTL|forecast": {
+   "point": 9.41651302964528,
+   "lo": 8.520401696747445,
+   "hi": 10.170567484736607
+  },
+  "S6-copilot|5 min TTL|guarantee72": {
+   "point": 10.236881349137745,
+   "lo": 8.560276018362606,
+   "hi": 12.01894175971653
+  },
+  "S6-tracelab|5 min TTL|forecast": {
+   "point": 19.69150923588368,
+   "lo": 12.397335445836928,
+   "hi": 28.662474325845295
+  },
+  "S6-tracelab|5 min TTL|guarantee72": {
+   "point": 36.856895589318825,
+   "lo": 29.11450764637915,
+   "hi": 44.85584921322298
+  },
+  "S6-copilot|1 h TTL|forecast": {
+   "point": 0.17721454886206017,
+   "lo": 0.015776466048006775,
+   "hi": 0.35138550349348485
+  },
+  "S6-copilot|1 h TTL|guarantee72": {
+   "point": 10.951547333861193,
+   "lo": 10.356015112362204,
+   "hi": 11.49385195297599
+  },
+  "S6-tracelab|1 h TTL|forecast": {
+   "point": 1.4268339772292802,
+   "lo": 0.8324888654611164,
+   "hi": 2.1631826954621443
+  },
+  "S6-tracelab|1 h TTL|guarantee72": {
+   "point": 19.181324103312754,
+   "lo": 16.750392626116643,
+   "hi": 22.24721962202732
+  }
+ },
+ "keepalive_vs_best_native": [
+  {
+   "label": "S8 scheduled agents",
+   "point": 78.93870232723395,
+   "lo": 78.93766846541753,
+   "hi": 78.93870232723395,
+   "kind": "simulated (3 seeds)"
+  },
+  {
+   "label": "S1 grouped mass swarm",
+   "point": 38.25437776893811,
+   "lo": 38.25437776893811,
+   "hi": 38.650653415251675,
+   "kind": "simulated (3 seeds)"
+  },
+  {
+   "label": "S2 parent waits for children",
+   "point": 21.056586432252356,
+   "lo": 21.056586432252356,
+   "hi": 21.41550672869317,
+   "kind": "simulated (3 seeds)"
+  },
+  {
+   "label": "S3 coordinator + async",
+   "point": 9.307859209904262,
+   "lo": 9.131023139403386,
+   "hi": 9.461170175751889,
+   "kind": "simulated (3 seeds)"
+  },
+  {
+   "label": "Real sessions: GitHub Copilot",
+   "point": 9.41651302964528,
+   "lo": 8.520401696747445,
+   "hi": 10.170567484736607,
+   "kind": "replayed (90% bootstrap)"
+  },
+  {
+   "label": "Real sessions: Claude Code / Codex",
+   "point": 1.4268339772292802,
+   "lo": 0.8324888654611164,
+   "hi": 2.1631826954621443,
+   "kind": "replayed (90% bootstrap)"
+  }
+ ]
+}

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; base-uri 'none'">
+<title>The 88-Hour Cache Problem: KV Retention Economics for Agent Swarms · ArticleLog</title><meta name="description" content="Why long-running agents lose their cache, not their history—and when keeping it warm is worth paying for. An exploratory simulation with public coding-agent traces.">
+<link rel="canonical" href="https://dineshdivi2.github.io/articles/001-agent-cache-economics/"><meta property="og:type" content="article">
+<meta property="og:title" content="The 88-Hour Cache Problem: KV Retention Economics for Agent Swarms"><meta property="og:description" content="Why long-running agents lose their cache, not their history—and when keeping it warm is worth paying for. An exploratory simulation with public coding-agent traces."><meta property="og:url" content="https://dineshdivi2.github.io/articles/001-agent-cache-economics/">
+<meta property="og:image" content="https://dineshdivi2.github.io/articles/001-agent-cache-economics/assets/essay_b_input_bill.png"><meta name="twitter:card" content="summary_large_image">
+<style>
+:root{color-scheme:light;--ink:#182f40;--muted:#526777;--accent:#137777;--line:#dce5ea;--wash:#eef6f5}
+*{box-sizing:border-box}html{scroll-padding-top:24px}body{margin:0;background:#f1f5f7;color:var(--ink);font:18px/1.75 Georgia,'Times New Roman',serif}
+a{color:var(--accent);text-underline-offset:3px;overflow-wrap:anywhere}a:focus-visible,summary:focus-visible{outline:3px solid #e8a347;outline-offset:4px}
+.site-nav{max-width:1090px;margin:22px auto;padding:0 26px;display:flex;flex-wrap:wrap;gap:12px 24px;font:14px/1.5 system-ui,sans-serif}
+main{max-width:1090px;margin:20px auto 64px;padding:42px 64px 54px;background:white;border:1px solid var(--line);border-radius:8px}
+main>*{max-width:780px;margin-left:auto;margin-right:auto}h1{font-size:40px;line-height:1.16;letter-spacing:-.015em;margin:14px auto 20px;overflow-wrap:normal}
+h2{font-size:26px;line-height:1.3;margin-top:44px;padding-top:16px;border-top:1px solid var(--line)}h3{font-size:21px;margin-top:28px;color:var(--accent)}
+.meta,.contents,.footer,figcaption,.kicker{font:13px/1.65 system-ui,sans-serif;color:var(--muted)}.kicker{color:var(--accent);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:22px}.contents{padding:14px 0;border-block:1px solid var(--line);margin-bottom:30px}.contents nav{columns:2;column-gap:26px;padding-top:10px}.contents a{display:block;padding:3px 0;break-inside:avoid;text-decoration:none}
+summary{cursor:pointer;color:var(--accent);font-weight:600}blockquote{background:var(--wash);border-left:4px solid var(--accent);padding:12px 22px;border-radius:0 6px 6px 0}blockquote p{margin:5px 0}
+figure{max-width:960px;margin-top:28px;margin-bottom:30px}figure img{width:100%;height:auto;border:1px solid var(--line);border-radius:6px}figcaption{margin-top:10px}
+.table-wrap{overflow-x:auto;max-width:960px}table{border-collapse:collapse;width:100%;font:14px/1.6 system-ui,sans-serif}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top;min-width:140px}th{background:#f7fafb}
+code{font:14px/1.5 ui-monospace,monospace;background:#f3f6f7;padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}li{margin:8px 0}.footer{margin-top:38px;padding-top:18px;border-top:1px solid var(--line)}
+.entry{padding:24px 0;border-block:1px solid var(--line);margin-top:28px}.entry h2{border:0;padding:0;margin:8px 0}.skip{position:absolute;left:-9999px}.skip:focus{left:12px;top:8px;background:white;padding:8px;z-index:2}
+@media(max-width:760px){main{padding:28px 20px;margin:12px 10px 40px}h1{font-size:31px}h2{font-size:24px}.contents nav{columns:1}.site-nav{padding:0 20px}}
+@media print{body{background:white}main{margin:0;border:0;padding:0}.site-nav,.contents{display:none}h2,figure{break-inside:avoid}a{color:inherit}}
+</style></head><body><a class="skip" href="#content">Skip to content</a>
+<nav class="site-nav" aria-label="Site"><a href="/articles/">ArticleLog</a><a href="https://github.com/dineshdivi2/swarm-kv-economics">Simulation repository</a><a href="/">Earlier chart demo</a></nav>
+<main id="content"><div class="kicker">ArticleLog 001 · Systems &amp; agents</div><div class="meta"><span>By Dinesh</span><time datetime="2026-10-16">16 October 2026</time><span>14 min read · 7 figures</span><span>Exploratory simulation</span></div><h1 id="the-88-hour-cache-problem-kv-retention-economics-for-agent-swarms">The 88-Hour Cache Problem: KV Retention Economics for Agent Swarms</h1><details class="contents"><summary>In this article</summary><nav><a href="#1-the-bill-behind-the-waiting">1. The bill behind the waiting</a><a href="#2-what-the-trace-counters-show">2. What the trace counters show</a><a href="#3-restoring-kv-can-matter-as-much-as-storing-it">3. Restoring KV can matter as much as storing it</a><a href="#4-two-possible-retention-arrangements">4. Two possible retention arrangements</a><a href="#5-the-break-even-decision">5. The break-even decision</a><a href="#6-three-kinds-of-waiting">6. Three kinds of waiting</a><a href="#7-what-the-simulator-supports">7. What the simulator supports</a><a href="#8-deepseek-retention-changes-the-clients-job">8. DeepSeek: retention changes the client's job</a><a href="#9-what-i-would-try-in-a-real-system">9. What I would try in a real system</a><a href="#10-the-interface-i-want-to-test">10. The interface I want to test</a><a href="#11-the-experiment-that-decides-it">11. The experiment that decides it</a><a href="#method-data-and-limits">Method, data and limits</a></nav></details>
+<p><em>Why long-running agents lose their cache, not their history—and when keeping it warm is worth paying for.</em></p>
+<p>An agent can save its conversation and send it again tomorrow. That preserves the history. It does not preserve the computation the provider already performed on that history.</p>
+<p>When a prompt cache misses, the provider must process the prefix again. A swarm can therefore remember what happened while repeatedly paying to reconstruct the state needed to continue.</p>
+<p>That is the distinction I wanted to investigate. The 88-hour research campaign in <a href="https://openai.com/index/navier-stokes-solution/">OpenAI's Navier–Stokes announcement</a> supplied the motivating example. This is an exploratory simulation of workflow patterns, not a reconstruction of that campaign or its bill.</p>
+<p>My argument is that cache economics depends on the shape of the waiting: a scheduled wake-up, a parent blocked on children and a human returning tomorrow present different retention decisions. Compact KV changes the provider's options. Workflow information may help decide where additional retention is worth paying for.</p>
+<p>The <a href="https://github.com/dineshdivi2/swarm-kv-economics">simulation repository</a> contains the v3 model, result snapshots, figure scripts and instructions for obtaining the public trace inputs. The percentages below are conditional model results, not measured savings from deploying a cache controller.</p>
+<h2 id="1-the-bill-behind-the-waiting">1. The bill behind the waiting</h2>
+<p>I took one day of GitHub Copilot's public coding-agent traces: 9,534 sessions and 344,134 calls. I repriced their reported token counters at Claude Opus 5.5 rates to illustrate the input-side economics. Copilot's actual models are anonymised; this is not its real invoice.</p>
+<figure><a href="assets/essay_b_input_bill.png" aria-label="Open figure: Illustrative Copilot bill at Opus rates"><img src="assets/essay_b_input_bill.png" alt="Illustrative Copilot bill at Opus rates" loading="lazy" decoding="async"></a><figcaption>Figure 1. Reported Copilot token counters repriced at the modeled five-minute write, hit and output rates. The missed-input split uses prompt lengths; it does not identify repeated content.</figcaption></figure>
+<p>Under a scenario that prices every missed input token at the five-minute cache-write rate, misses account for about <strong>62% of the illustrative $23.6K bill</strong>. Output accounts for about 20%. Charging misses at the base input rate instead brings the total to $20.7K, with misses accounting for 56%.</p>
+<p>The more tempting number needs care. A prompt-length calculation assigns about 69% of missed tokens to input beyond each session's initial prompt and positive prompt-length growth. If that inferred portion were an unchanged, reusable prefix and every such miss became a hit, the arithmetic difference would be about $9.6K at the write rate, or $7.6K at the base rate: roughly 41% or 37% of the respective bills.</p>
+<p><strong>Prompt lengths cannot establish that those tokens are identical.</strong> An agent can rewrite an earlier section while keeping the same length. The 69% is therefore a length-derived proxy, not a lower bound on repeated content. The 37–41% calculation is a conditional opportunity estimate, not measured avoidable waste or an attainable policy saving.</p>
+<p>The defensible observation is simpler: input misses can dominate this illustrative bill. Whether a retention policy reduces that cost depends on exact prefix stability, timing and the price of maintaining it.</p>
+<h2 id="2-what-the-trace-counters-show">2. What the trace counters show</h2>
+<p>Across the Copilot extract and 8,041 TraceLab sessions, I examined 17,575 sessions containing 1,009,320 calls.</p>
+<p>For adjacent calls using the same model, the calculation takes the smaller prompt length as a possible reusable-prefix length. It caps the next call's reported cached tokens at that length, then sums numerator and denominator within each request-start gap bin.</p>
+<figure><a href="assets/v3_1_measured_survival.png" aria-label="Open figure: Observed cached-token fractions by inter-call gap"><img src="assets/v3_1_measured_survival.png" alt="Observed cached-token fractions by inter-call gap" loading="lazy" decoding="async"></a><figcaption>Figure 2. Gap-binned cached-token fractions from adjacent same-model calls, capped at the smaller prompt length. These are not exact-prefix survival probabilities or evidence of maintenance uplift.</figcaption></figure>
+<p>The patterns differ. The Claude-labelled TraceLab subset has very high cached-token fractions at short gaps and pronounced drops around the documented TTL boundaries. The OpenAI-labelled subset declines more gradually. Copilot's mixed-model stack has a lower cached-token fraction even in some short-gap bins.</p>
+<p>These are <strong>observed cached-token fractions, not identified probabilities that an exact prefix survives</strong>. Prompt edits, routing, model selection, workload composition and cache expiry can all affect them. The data does not tell me how much sending an extra maintenance request would improve a later cache hit.</p>
+<p>The simulator uses these curves as a restartable cache-retention law in one sensitivity analysis. That is an additional modeling assumption. It must not be confused with a measured keep-alive intervention.</p>
+<h2 id="3-restoring-kv-can-matter-as-much-as-storing-it">3. Restoring KV can matter as much as storing it</h2>
+<p>Storage capacity is only part of the problem. A saved context must also become usable again within the available latency and bandwidth budget.</p>
+<figure><a href="assets/essay_f_restore_vs_recompute.png" aria-label="Open figure: Illustrative transfer times for different KV footprints"><img src="assets/essay_f_restore_vs_recompute.png" alt="Illustrative transfer times for different KV footprints" loading="lazy" decoding="async"></a><figcaption>Figure 3. Illustrative transfer arithmetic for a constructed large KV layout and the reported compact global-KV component. Full restoration, replay, queueing and matched model performance are not measured.</figcaption></figure>
+<p>For a constructed Llama-70B-shaped FP16 layout, a 100K-token context occupies about 31 GiB. Moving that many bytes takes roughly 26 seconds over a 10 Gbps link, or 4.7 seconds at an assumed 7 GB/s local-storage rate. A five-second recompute time is included as an illustrative estimate, not a benchmark.</p>
+<p><a href="https://arxiv.org/abs/2609.19969">DeepSeek's V4.1-Flash report</a> gives a global KV footprint of 890 bytes per token. At 100K tokens, that component is about 89 MB: roughly 71 ms of ideal transfer time over the same network link.</p>
+<p>That comparison has a strict limit: <strong>89 MB is the global KV component, not the complete state or an end-to-end restore measurement.</strong> The report separately describes local sliding-window state and bounded replay. Queueing, allocation, deserialisation and replay can add latency. Different model architectures also have different recompute costs.</p>
+<p>The report describes an internal lifetime of at least 72 hours for persistent global KV. Its <a href="https://api-docs.deepseek.com/guides/kv_cache/">public API documentation</a> nevertheless describes caching as best effort. An internal deployment design is not a customer-facing retention guarantee.</p>
+<p>Compact KV can make longer retention more practical. This does not establish the KV sizes of proprietary models, explain why their providers selected particular TTLs, or prove that a compact model can restore a complete context in under 100 ms.</p>
+<h2 id="4-two-possible-retention-arrangements">4. Two possible retention arrangements</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Arrangement</th>
+<th>What keeps the prefix reusable</th>
+<th>What workflow information can help decide</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short explicit TTL with client refresh</td>
+<td>Compatible requests reuse the prefix before expiry</td>
+<td>Which prefixes justify more reads, and when to stop</td>
+</tr>
+<tr>
+<td>Longer provider-managed retention</td>
+<td>The provider stores or reconstructs state under its own policy</td>
+<td>Priority, readiness deadlines and whether a priced commitment is useful</td>
+</tr>
+</tbody>
+</table></div>
+<p>These arrangements are choices about architecture and policy; they are not fixed categories of model vendors.</p>
+<p>When passive retention already handles almost every return, client hints may add little. They become more interesting when capacity is constrained, many agents wake together, or the client needs a readiness deadline rather than eventual availability. None of those readiness benefits is measured by the current simulator.</p>
+<h2 id="5-the-break-even-decision">5. The break-even decision</h2>
+<p>Keeping a context warm costs maintenance reads. It is worthwhile only if the extra reuse they buy is worth more:</p>
+<blockquote>
+<p><strong>n × C_hit &lt; q × (s_maintained − s_passive) × (C_miss − C_hit)</strong></p>
+</blockquote>
+<p>Here, n is the number of maintenance reads, q is the probability of a compatible return, and s describes cache availability at that return under each policy.</p>
+<p>This is simplified bookkeeping. The left side assumes hits, no generated output and no retries. Expected rebuild costs, output, failures and other maintenance overhead belong there too. The implemented simulator includes modeled rebuild costs; the short equation is an intuition, not a complete controller.</p>
+<p>At the model's Opus 5.5 one-hour rates, reading a 100K-token prefix costs $0.02 and writing it costs $0.80. With a certain compatible return and an assumed survival uplift of 0.96, the simplified allowance is about 37 maintenance reads. At approximately hourly spacing, that is on the order of a day and a half. Using the five-minute write rate gives an allowance of about 23 reads, or roughly two hours of refreshes.</p>
+<p>Those are conditional thresholds, not universal advice. A lower return probability or a smaller survival uplift reduces the allowance. Refreshes must arrive before expiry, with margin for request timing and failures.</p>
+<p>For a best-effort cache the uplift is the unanswered question. At DeepSeek's peak rates used in this model, a 100K-token hit costs $0.0006 and the miss–hit difference is $0.0294. If maintenance raised survival from 80% to 95%, with a 50% chance of return, the simplified budget would be fewer than four reads. The survival improvement in that example is assumed, not measured.</p>
+<h2 id="6-three-kinds-of-waiting">6. Three kinds of waiting</h2>
+<h3 id="scheduled-agents">Scheduled agents</h3>
+<p>A scheduler knows when a nightly monitor should run again. In the synthetic mixture of hourly, four-hourly, daily and weekly agents, the forecast policy reduces modeled input cost by <strong>78.9% relative to the cheaper passive native TTL</strong>.</p>
+<p>That is a result for the chosen mixture, not a claim about all scheduled agents. Some individual weekly waits sit beyond the model's refresh break-even. The model's hypothetical retention guarantee can help those waits; in a real system, shorter contexts, different scheduling or cheaper reconstruction are other options.</p>
+<h3 id="a-parent-waiting-for-children">A parent waiting for children</h3>
+<p><a href="https://www.anthropic.com/engineering/multi-agent-research-system">Anthropic's multi-agent research-system account</a> describes a lead agent waiting for synchronous sets of subagents, with a single slow child able to block progress.</p>
+<p>The join rule changes the parent's wait:</p>
+<figure><a href="assets/essay_a_quorum_join.png" aria-label="Open figure: How the join rule changes the parent&#x27;s wait"><img src="assets/essay_a_quorum_join.png" alt="How the join rule changes the parent's wait" loading="lazy" decoding="async"></a><figcaption>Figure 4. Constructed timing example. A quorum is appropriate only when it satisfies the task; changing the join rule can change output quality and completeness.</figcaption></figure>
+<p>A two-of-three quorum is useful only when two results are sufficient for the task. It changes the task's completion condition; it is not automatically a valid substitute for waiting for all three. The figure illustrates timing, not an evaluated quality-preserving optimisation.</p>
+<p>In the synthetic parent–child family, the forecast policy reduces modeled input cost by <strong>21.1% relative to the cheaper passive native TTL</strong>. On the one-hour TTL alone, additional keep-alive saves 0% because the modeled waits already fit inside that window. Choosing the TTL matters before adding orchestration.</p>
+<h3 id="an-asynchronous-coordinator">An asynchronous coordinator</h3>
+<p><a href="https://www.anthropic.com/research/riemann-zeta">Anthropic's Riemann-zeta account</a> describes a long research effort coordinating about 60 subagents. That motivates a different pattern: agents launch, wait and return at uneven times.</p>
+<p>The synthetic coordinator family reduces modeled input cost by <strong>9.3% relative to the cheaper passive native TTL</strong>. Much of its maintenance spend still falls on paths with no reusable prefix at return. Knowing that a branch has been cancelled or compacted can therefore be as useful as forecasting when it will wake.</p>
+<p>These scenarios illustrate workflow shapes. They do not replay the internal execution traces of those published research systems.</p>
+<h2 id="7-what-the-simulator-supports">7. What the simulator supports</h2>
+<figure><a href="assets/essay_c_keepalive_vs_native.png" aria-label="Open figure: Modeled input-cost reductions against the best passive native TTL"><img src="assets/essay_c_keepalive_vs_native.png" alt="Modeled input-cost reductions against the best passive native TTL" loading="lazy" decoding="async"></a><figcaption>Figure 5. Supplied v3 modeled input-cost reductions. Synthetic bars show three-seed ranges; replay bars show 90% session-bootstrap intervals. Retrospective feature labels limit replay interpretation.</figcaption></figure>
+<p>“Best native TTL” means the cheaper of the modeled five-minute and one-hour passive policies for that workload. The forecast result likewise uses the cheaper forecast policy on those two TTLs. Percentages in this section compare <strong>modeled input and maintenance cost</strong>, not the entire application bill or provider operating cost.</p>
+<p>The stored results show reductions of 78.9% for scheduled agents, 38.3% for the grouped mass swarm, 21.1% for parents waiting on children and 9.3% for asynchronous coordinators. These are synthetic scenarios with three-seed ranges, which do not measure uncertainty in the workload assumptions.</p>
+<p>The public-session replays show <strong>9.4% for Copilot</strong> (90% bootstrap interval 8.5–10.2%) and <strong>1.4% for TraceLab</strong> (0.8–2.2%), each against its cheaper passive native TTL. Against the five-minute baseline specifically, the TraceLab result is 19.7% (12.4–28.7%). The denominator changes the conclusion.</p>
+<p>There is also a material replay limitation: although the predictor is fitted on one half of the sessions and evaluated on the other, the replay labels wait type from the next call's initiator and treats next-model switches as known. Those features are not established as available at decision time. <strong>These replay numbers are therefore not fully prospective evidence of a deployable policy.</strong> The intervals condition on those labels, extraction choices and retention assumptions.</p>
+<p>Three further results are useful as hypotheses:</p>
+<ol>
+<li>
+<p><strong>A long retention commitment can beat repeated refreshes under the assumed tariff.</strong> At the one-hour TTL, the hypothetical 72-hour guarantee reduces modeled input cost by 11.0% for Copilot and 19.2% for TraceLab, compared with 0.18% and 1.43% for keep-alive. The guarantee is priced at the one-hour write tier. A different tariff could change the ranking.</p>
+<figure><a href="assets/essay_d_guarantee_vs_keepalive.png" aria-label="Open figure: Hypothetical 72-hour guarantee compared with keep-alive"><img src="assets/essay_d_guarantee_vs_keepalive.png" alt="Hypothetical 72-hour guarantee compared with keep-alive" loading="lazy" decoding="async"></a><figcaption>Figure 6. Supplied replay results against each panel’s passive TTL. The 72-hour guarantee and its one-hour write tariff are hypothetical. Error bars condition on model and extraction assumptions.</figcaption></figure>
+</li>
+<li>
+<p><strong>Keep-alive is unattractive under the selected lossy-curve assumptions.</strong> When observed OpenAI- and Copilot-labelled cached-token fractions are treated as restartable retention probabilities, modeled rebuilds erase the benefit of refreshes. That is a result of this counterfactual model, not proof that keep-alive never pays on those providers.</p>
+</li>
+<li>
+<p><strong>Indiscriminate refreshes can make the modeled bill worse.</strong> Keeping every prefix warm for six hours after each call increases modeled input cost by about 61% on the Copilot replay and 109% in the synthetic tree-search scenario, relative to their five-minute passive baselines.</p>
+</li>
+</ol>
+<p>The code also contains a policy named <code>oracle</code>. It compares a restricted set of actions and is not a proven optimum: partial maintenance can beat it. I do not use it as an attainable upper bound here.</p>
+<h2 id="8-deepseek-retention-changes-the-clients-job">8. DeepSeek: retention changes the client's job</h2>
+<p>No live DeepSeek retention probe was run for this article. I instead examined assumed retention curves of roughly one, six, 24 and 72 hours, using the model's DeepSeek peak-rate snapshot.</p>
+<figure><a href="assets/essay_e_deepseek_bracket.png" aria-label="Open figure: Sensitivity to assumed DeepSeek retention"><img src="assets/essay_e_deepseek_bracket.png" alt="Sensitivity to assumed DeepSeek retention" loading="lazy" decoding="async"></a><figcaption>Figure 7. Assumed retention curves and tariffs at the modeled peak rates. The guarantee case assumes 1% in-lifetime loss. No live API retention experiment was run.</figcaption></figure>
+<p>Under the one-hour assumption, keep-alive has substantial modeled value in the scheduled and mass-swarm families. With longer assumed passive retention, that value falls sharply outside scheduled long waits. For scheduled agents, the additional reduction is about 25%, 19% and 5% across the six-, 24- and 72-hour assumptions.</p>
+<p>These are sensitivity scenarios, not measurements of the public API. The guarantee panel also assumes only 1% loss within the guaranteed lifetime. It is an optimistic scenario under a chosen tariff, not an identified bound on real savings.</p>
+<p>If untouched prefixes usually survive until return, a maintenance client may be unnecessary. The remaining question is whether priority or readiness commitments provide enough value to justify an interface and a price.</p>
+<h2 id="9-what-i-would-try-in-a-real-system">9. What I would try in a real system</h2>
+<ul>
+<li><strong>Choose the native TTL first.</strong> Compare actual bills for the available TTLs before adding refresh requests.</li>
+<li><strong>Measure exact prefix stability and intervention uplift.</strong> Prompt lengths and natural-call hit counters cannot establish either one alone.</li>
+<li><strong>Use a compatible pre-warm request where supported.</strong> <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching">Anthropic documents <code>max_tokens: 0</code></a> for pre-warming without generating output. Its restrictions and thinking configuration still matter; a request rejected with thinking enabled is not proof that disabling thinking preserves the same cached prefix.</li>
+<li><strong>Stop when a prefix is no longer useful.</strong> Pruning, cancellation, model changes and compaction can invalidate the reason for further maintenance.</li>
+<li><strong>Move status polling into tools and callbacks.</strong> <a href="https://openai.com/index/third-moment-research/">OpenAI's Third Moment case study</a> describes agents spending tokens on repeated completion checks while long backtests ran. A cache policy should not require repeatedly asking a model whether a job has finished.</li>
+</ul>
+<p>API behaviour and prices can change. The provider documentation is the operational reference; the simulation is a dated set of assumptions.</p>
+<h2 id="10-the-interface-i-want-to-test">10. The interface I want to test</h2>
+<p>Workflow-aware cache management already has prior art: <a href="https://arxiv.org/abs/2507.07400">KVFlow</a>, <a href="https://arxiv.org/abs/2605.06472">prediction-based KV management</a> and <a href="https://arxiv.org/abs/2511.02230">Continuum</a>, alongside the Copilot study's keep-alive discussion. There are also lease or session-hint proposals in <a href="https://github.com/llm-d/llm-d-router/issues/2273">llm-d</a> and <a href="https://github.com/vllm-project/vllm/issues/52113">vLLM</a>, and <a href="https://docs.nvidia.com/dynamo/v1.1.0/user-guides/agents">session KV support in NVIDIA Dynamo</a>.</p>
+<p>The design question I want to explore is a portable, priced retention and readiness contract that makes the distinction between an advisory hint and a commitment explicit.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Client signal</th>
+<th>Meaning</th>
+<th>Response the contract would need</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Return estimate</td>
+<td>This prefix is likely to be needed within a time window</td>
+<td>Accepted, clipped or ignored; identify the scope</td>
+</tr>
+<tr>
+<td>Release</td>
+<td>This branch no longer needs the prefix</td>
+<td>Apply ownership rules for prefixes shared with other branches</td>
+</tr>
+<tr>
+<td>Commitment request</td>
+<td>Keep this prefix reusable or ready until a deadline, at a price</td>
+<td>State expiry, latency, price and failure handling</td>
+</tr>
+</tbody>
+</table></div>
+<p>For example, the client might predict a return in 20–40 minutes and request readiness by minute 20. The provider could accept retention through minute 40 while declining the readiness deadline. That response would be more useful than silently treating a hint as a guarantee. This is a proposed contract, not an implemented API.</p>
+<p>Stopping refreshes, releasing a session and deleting stored data remain different actions. The provider still decides whether to hold state in hot memory, use slower storage or reconstruct it.</p>
+<h2 id="11-the-experiment-that-decides-it">11. The experiment that decides it</h2>
+<p>The question is falsifiable:</p>
+<blockquote>
+<p><strong>Does information observable at decision time improve cost or readiness beyond the best native TTL and a simple policy that stops maintaining known-dead contexts?</strong></p>
+</blockquote>
+<p>The synthetic results make that worth testing for scheduled agents and blocked parents. The human-paced replays are less convincing, especially given their retrospective labels.</p>
+<p>Two experiments remain unrun: matched untouched-versus-refreshed prefixes across different delays, and compatible pre-warming across thinking configurations. Both need actual billing counters, exact prefix identity, matched controls and repeated trials. Natural-call cached-token fractions cannot replace those experiments or validate a multi-step maintenance chain.</p>
+<p>The outcome could narrow the proposal substantially. If passive retention is already generous and readiness adds little, the best client policy may be to send no extra requests. If observed workflow signals improve a controlled comparison, then a retention interface has a stronger case.</p>
+<h2 id="method-data-and-limits">Method, data and limits</h2>
+<ul>
+<li><strong>Version:</strong> publication edition based on simulator v3 and its supplied result snapshot. The full simulator was not independently rerun during publication polishing. The observed cached-token curves were checked against the supplied arrays in an earlier targeted audit; this is not a reconstruction from the raw upstream traces.</li>
+<li><strong>Public data:</strong> <a href="https://github.com/Azure/AzurePublicDataset/releases/tag/ghcp-coding-agent-2026">GitHub Copilot trace release</a>, <a href="https://arxiv.org/abs/2608.00101">Copilot study</a>, <a href="https://github.com/uw-syfi/TraceLab/releases/tag/v0.0.2">TraceLab release</a> and <a href="https://arxiv.org/abs/2606.30560">TraceLab study</a>. Obtain data under the upstream terms. The repository distributes extraction code and aggregate results, not the trace arrays.</li>
+<li><strong>Timing:</strong> Copilot request start is inferred as timestamp minus duration. A targeted check still found ten overlapping adjacent calls; the interpretation is not verified upstream timing semantics. TraceLab uses the last input event as a request-start proxy.</li>
+<li><strong>Replay:</strong> only S6 replays recorded coding-agent sessions. The other families are synthetic. Holdout fitting does not remove the future-label limitation described above. Terminal waits are handled through alternative assumptions, not proven abandonment labels.</li>
+<li><strong>Costs:</strong> the bill illustration includes output; policy comparisons use modeled input and maintenance cost. Provider operations, application execution and task quality are outside that cost model. Historical prices are retained for reproducibility. <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching">Opus prices</a> and <a href="https://api-docs.deepseek.com/quick_start/pricing/">DeepSeek peak prices</a> were cross-checked on 16 October 2026; DeepSeek also offers off-peak rates.</li>
+<li><strong>Uncertainty:</strong> three synthetic seeds and 200 session-bootstrap resamples do not cover uncertainty in retention laws, workload design, feature availability or prices.</li>
+<li><strong>Not modeled:</strong> restore contention, correlated wake bursts, progress-triggered replanning, exact content divergence and quality effects of changing join rules. The 72-hour guarantee and its tariff are hypothetical.</li>
+<li><strong>Reproduce and inspect:</strong> <a href="https://github.com/dineshdivi2/swarm-kv-economics">simulation README</a>, <a href="https://github.com/dineshdivi2/swarm-kv-economics/blob/main/results/v3-tables.md">v3 tables</a> and <a href="https://github.com/dineshdivi2/swarm-kv-economics/blob/main/results/essay-figure-data.json">figure data</a>. Source variable names and older generated findings may use stronger terminology; the limitations above qualify those labels.</li>
+</ul>
+<p><em>Views are my own.</em></p><footer class="footer">ArticleLog 001 · Publication edition, 16 October 2026. Figures rebuilt from supplied v3 aggregates with corrected labels. <a href="article.md">Read the Markdown source</a> · <a href="https://github.com/dineshdivi2/dineshdivi2.github.io">Site source</a></footer></main></body></html>
