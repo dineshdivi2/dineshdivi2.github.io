@@ -158,24 +158,80 @@ summary{cursor:pointer;color:var(--accent);font-weight:600}blockquote{background
 figure{max-width:960px;margin-top:28px;margin-bottom:30px}figure img{width:100%;height:auto;border:1px solid var(--line);border-radius:6px}figcaption{margin-top:10px}
 .table-wrap{overflow-x:auto;max-width:960px}table{border-collapse:collapse;width:100%;font:14px/1.6 system-ui,sans-serif}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top;min-width:140px}th{background:#f7fafb}
 code{font:14px/1.5 ui-monospace,monospace;background:#f3f6f7;padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}li{margin:8px 0}.footer{margin-top:38px;padding-top:18px;border-top:1px solid var(--line)}
-.entry{padding:24px 0;border-block:1px solid var(--line);margin-top:28px}.entry h2{border:0;padding:0;margin:8px 0}.skip{position:absolute;left:-9999px}.skip:focus{left:12px;top:8px;background:white;padding:8px;z-index:2}
-@media(max-width:760px){main{padding:28px 20px;margin:12px 10px 40px}h1{font-size:31px}h2{font-size:24px}.contents nav{columns:1}.site-nav{padding:0 20px}}
+.skip{position:absolute;left:-9999px}.skip:focus{left:12px;top:8px;background:white;padding:8px;z-index:2}
+.site-nav{align-items:baseline;font-size:15px}.site-nav .brand{margin-right:auto;color:var(--ink);font-weight:700;text-decoration:none}.site-nav a[aria-current]{color:var(--ink);font-weight:600;text-decoration-thickness:2px}
+.section-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 16px;margin-top:48px}.section-head h2{border:0;padding:0;margin:0}.section-head a{font:14px/1.5 system-ui,sans-serif}
+.items{margin-top:20px}.item{padding:22px 0;border-top:1px solid var(--line)}.item :is(h2,h3){border:0;padding:0;margin:6px 0 4px;font-size:24px;line-height:1.3}.item :is(h2,h3) a{text-decoration:none}.item :is(h2,h3) a:hover{text-decoration:underline}.item p{margin:6px 0}
+.item-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font:13px/1.6 system-ui,sans-serif;color:var(--muted)}.item-meta .kicker{font-size:12px}
+.badge{display:inline-block;padding:2px 10px;border:1px solid #c5e0dd;border-radius:999px;background:var(--wash);color:#0f6262;font:600 12px/1.6 system-ui,sans-serif;white-space:nowrap}
+.pager{display:flex;flex-wrap:wrap;gap:16px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font:15px/1.5 system-ui,sans-serif}.pager a{text-decoration:none}.pager small{display:block;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}.pager .next{margin-left:auto;text-align:right}.pager+.footer{border-top:0;margin-top:14px}
+@media(max-width:760px){main{padding:28px 20px;margin:12px 10px 40px}h1{font-size:31px}h2{font-size:24px}.item :is(h2,h3){font-size:22px}.contents nav{columns:1}.site-nav{padding:0 20px}}
 @media print{body{background:white}main{margin:0;border:0;padding:0}.site-nav,.contents{display:none}h2,figure{break-inside:avoid}a{color:inherit}}
 '''
 
 
-def page(title, body, canonical, description, article=False):
-    social_image = f'<meta property="og:image" content="{URL}assets/essay_b_input_bill.png">' if canonical.startswith(URL) else ''
+SITE = 'https://dineshdivi2.github.io'
+SECTIONS = [('articles', '/articles/', 'ArticleLog'), ('builds', '/builds/', 'BuildLog')]
+
+
+def page(title, body, canonical, description, article=False, section=None, card=None):
+    """card names a generated 1200x630 share image in /assets/og/; the article keeps its own figure."""
+    if card:
+        social_image = (f'<meta property="og:image" content="{SITE}/assets/og/{card}.png"><meta property="og:image:width" content="1200">'
+                        f'<meta property="og:image:height" content="630"><meta property="og:image:alt" content="{html.escape(title, quote=True)}">')
+    elif canonical.startswith(URL):
+        social_image = f'<meta property="og:image" content="{URL}assets/essay_b_input_bill.png">'
+    else:
+        social_image = ''
+    full_title = title if section == 'home' else f'{title} · Dinesh'
+    links = []
+    for key, href, label in SECTIONS:
+        current = '' if key != section else ' aria-current="page"' if canonical == SITE + href else ' aria-current="true"'
+        links.append(f'<a href="{href}"{current}>{label}</a>')
+    brand_current = ' aria-current="page"' if section == 'home' else ''
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; base-uri 'none'">
-<title>{html.escape(title)} · Dinesh</title><meta name="description" content="{html.escape(description, quote=True)}">
-<link rel="canonical" href="{canonical}"><meta property="og:type" content="{'article' if article else 'website'}">
-<meta property="og:title" content="{html.escape(title, quote=True)}"><meta property="og:description" content="{html.escape(description, quote=True)}"><meta property="og:url" content="{canonical}">
+<title>{html.escape(full_title)}</title><meta name="description" content="{html.escape(description, quote=True)}">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/assets/icon-180.png" sizes="180x180"><link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="canonical" href="{canonical}"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:site_name" content="Dinesh">
+<meta property="og:title" content="{html.escape(full_title if section == 'home' else title, quote=True)}"><meta property="og:description" content="{html.escape(description, quote=True)}"><meta property="og:url" content="{canonical}">
 {social_image}<meta name="twitter:card" content="{'summary_large_image' if social_image else 'summary'}">
 <style>{CSS}</style></head><body><a class="skip" href="#content">Skip to content</a>
-<nav class="site-nav" aria-label="Site"><a href="/">Home</a><a href="/articles/">ArticleLog</a><a href="/builds/">BuildLog</a></nav>
+<nav class="site-nav" aria-label="Site"><a class="brand" href="/"{brand_current}>Dinesh</a>{''.join(links)}</nav>
 <main id="content">{body}</main></body></html>'''
+
+
+INK, MUTED = '#182f40', '#526777'
+
+
+def share_card(name, kicker, title, subtitle, status=None):
+    # Text-only 1200x630 card for link previews on X and elsewhere.
+    fig = plt.figure(figsize=(12, 6.3), dpi=100)
+    fig.patch.set_facecolor('white')
+    fig.add_artist(matplotlib.patches.Rectangle((0, 0), .014, 1, color=TEAL, transform=fig.transFigure))
+    fig.text(.075, .84, kicker.upper(), color=TEAL, fontsize=15, fontweight='bold', family='DejaVu Sans')
+    lines = title.split('\n') if '\n' in title else textwrap.wrap(title, 30)
+    fig.text(.075, .76, '\n'.join(lines), color=INK, fontsize=40, fontweight='bold', family='DejaVu Serif',
+             va='top', linespacing=1.2)
+    sub = textwrap.wrap(subtitle, 62)[:2]
+    fig.text(.075, .76 - .123 * len(lines) - .05, '\n'.join(sub), color=MUTED, fontsize=18, family='DejaVu Sans',
+             va='top', linespacing=1.45)
+    if status:
+        fig.text(.075, .1, status, color='#0f6262', fontsize=15, fontweight='bold', family='DejaVu Sans',
+                 bbox={'boxstyle': 'round,pad=.5,rounding_size=.9', 'facecolor': '#eef6f5', 'edgecolor': '#c5e0dd'})
+    fig.text(.925, .1, 'dineshdivi2.github.io', color=MUTED, fontsize=15, family='DejaVu Sans', ha='right')
+    out = ROOT / 'assets' / 'og'
+    out.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out / f'{name}.png', dpi=100, metadata={'Software': None})
+    plt.close(fig)
+
+
+def icon():
+    fig = plt.figure(figsize=(1.8, 1.8), dpi=100)
+    fig.text(.5, .47, 'D', color='white', fontsize=82, fontweight='bold', family='DejaVu Serif', ha='center', va='center')
+    fig.savefig(ROOT / 'assets' / 'icon-180.png', dpi=100, facecolor=TEAL, metadata={'Software': None})
+    plt.close(fig)
 
 
 def build():
@@ -199,37 +255,63 @@ def build():
     body = meta + body[:h1end] + toc_html + body[h1end:]
     body += '<footer class="footer">ArticleLog 001 · Publication edition, 16 October 2026. Figures rebuilt from supplied v3 aggregates with corrected labels. <a href="article.md">Read the Markdown source</a> · <a href="https://github.com/dineshdivi2/dineshdivi2.github.io">Site source</a></footer>'
     description = 'Why long-running agents lose their cache, not their history—and when keeping it warm is worth paying for. An exploratory simulation with public coding-agent traces.'
-    (ARTICLE / 'index.html').write_text(page(TITLE, body, URL, description, True), encoding='utf-8')
+    (ARTICLE / 'index.html').write_text(page(TITLE, body, URL, description, True, section='articles'), encoding='utf-8')
+    article_item = f'''<article class="item"><div class="item-meta"><span>ArticleLog 001</span><time datetime="2026-10-16">16 October 2026</time><span class="badge">Exploratory simulation</span></div>
+    <TAG><a href="/articles/001-agent-cache-economics/">{html.escape(TITLE)}</a></TAG><p>{description}</p></article>'''
     index_body = f'''<div class="kicker">Dinesh · Technical writing</div><h1>ArticleLog</h1><p>Investigations into AI systems, agent workflows and the costs behind them.</p>
-    <p class="meta">1 published article · Next entry: 002</p><article class="entry"><div class="meta">001 · 16 October 2026 · Exploratory simulation</div><h2><a href="/articles/001-agent-cache-economics/">{html.escape(TITLE)}</a></h2><p>{description}</p><p><a href="/articles/001-agent-cache-economics/">Read the article →</a></p></article>'''
-    (ROOT / 'articles/index.html').write_text(page('ArticleLog', index_body, 'https://dineshdivi2.github.io/articles/', 'Technical articles by Dinesh.'), encoding='utf-8')
-    build_logs()
-    home = '''<div class="kicker">Dinesh · Building &amp; writing</div><h1>Things I build.<br>Systems I investigate.</h1>
+    <p class="meta">1 published article · Next entry: 002</p><div class="items">{article_item.replace('TAG', 'h2')}</div>'''
+    (ROOT / 'articles/index.html').write_text(page('ArticleLog', index_body, SITE + '/articles/', 'Technical articles by Dinesh.', section='articles', card='articles'), encoding='utf-8')
+    builds = build_logs()
+    build_items = ''.join(build_item(entry, 'h3') for entry in builds)
+    home_description = 'Projects and technical writing by Dinesh on AI systems, agent workflows and software.'
+    home = f'''<div class="kicker">Dinesh · Building &amp; writing</div><h1>Things I build.<br>Systems I investigate.</h1>
     <p>A small collection of projects and technical writing about AI systems, software and the decisions behind them.</p>
-    <section class="entry"><h2><a href="/articles/">ArticleLog</a></h2><p>Investigations into agent workflows and infrastructure economics.</p><p><a href="/articles/001-agent-cache-economics/">001 — The 88-Hour Cache Problem →</a></p></section>
-    <section class="entry"><h2><a href="/builds/">BuildLog</a></h2><p>Three projects, what they do, and where they stand.</p><ul><li><a href="/builds/001-public-record/">001 — Public Record</a></li><li><a href="/builds/002-irisflow/">002 — IrisFlow</a></li><li><a href="/builds/003-yt2apple/">003 — yt2apple</a></li></ul></section>
+    <section aria-labelledby="articlelog"><div class="section-head"><h2 id="articlelog">ArticleLog</h2><a href="/articles/">All articles →</a></div>
+    <p>Investigations into agent workflows and infrastructure economics.</p><div class="items">{article_item.replace('TAG', 'h3')}</div></section>
+    <section aria-labelledby="buildlog"><div class="section-head"><h2 id="buildlog">BuildLog</h2><a href="/builds/">All builds →</a></div>
+    <p>Projects, what they do, and where they stand.</p><div class="items">{build_items}</div></section>
     <footer class="footer"><a href="https://x.com/getsetahead">Follow on X</a> · <a href="https://github.com/dineshdivi2">GitHub</a></footer>'''
-    (ROOT / 'index.html').write_text(page('Home', home, 'https://dineshdivi2.github.io/', 'Projects and technical writing by Dinesh.'), encoding='utf-8')
+    (ROOT / 'index.html').write_text(page('Dinesh — Projects and technical writing', home, SITE + '/', home_description, section='home', card='home'), encoding='utf-8')
+    share_card('home', 'Dinesh · Building & writing', 'Things I build.\nSystems I investigate.', home_description)
+    share_card('articles', 'Dinesh · Technical writing', 'ArticleLog', 'Investigations into AI systems, agent workflows and the costs behind them.')
+    icon()
     (ROOT / 'articles/index.json').write_text(json.dumps({'series':'ArticleLog','published_count':1,'next_number':2,'entries':[{'number':1,'title':TITLE,'published_at':'2026-10-16','url':URL,'repository_url':REPO}]},indent=2),encoding='utf-8')
     print(json.dumps({'article':str(ARTICLE/'index.html'),'figures':len(CAPTIONS),'words':words,'title':TITLE}))
+
+
+def build_item(entry, tag):
+    route = '/builds/' + entry['slug'] + '/'
+    return (f'<article class="item"><div class="item-meta"><span>BuildLog {entry["number"]:03d}</span><span class="badge">{html.escape(entry["status"])}</span></div>'
+            f'<{tag}><a href="{route}">{html.escape(entry["title"])}</a></{tag}><p>{html.escape(entry["description"])}</p></article>')
 
 
 def build_logs():
     directory = ROOT / 'builds'
     data = json.loads((directory / 'index.json').read_text(encoding='utf-8'))
-    cards = []
-    for entry in data['entries']:
+    entries = data['entries']
+    for i, entry in enumerate(entries):
         folder = directory / entry['slug']
         source = (folder / 'build.md').read_text(encoding='utf-8')
         body = markdown.markdown(source, extensions=['sane_lists'])
         label = f"BuildLog {entry['number']:03d}"
-        body = f'<div class="kicker">{label}</div><p class="meta">{html.escape(entry["status"])}</p>' + body
+        body = f'<div class="item-meta"><span class="kicker">{label}</span><span class="badge">{html.escape(entry["status"])}</span></div>' + body
+        pager = []
+        if i > 0:
+            prev = entries[i - 1]
+            pager.append(f'<a class="prev" href="/builds/{prev["slug"]}/"><small>Previous</small>← {prev["number"]:03d} · {html.escape(prev["title"])}</a>')
+        if i < len(entries) - 1:
+            nxt = entries[i + 1]
+            pager.append(f'<a class="next" href="/builds/{nxt["slug"]}/"><small>Next</small>{nxt["number"]:03d} · {html.escape(nxt["title"])} →</a>')
+        body += f'<nav class="pager" aria-label="More builds">{"".join(pager)}</nav>'
         body += f'<footer class="footer"><a href="{entry["post_url"]}">Original {label} post on X</a> · <a href="/builds/">All builds</a></footer>'
         route = '/builds/' + entry['slug'] + '/'
-        (folder / 'index.html').write_text(page(entry['title'], body, 'https://dineshdivi2.github.io' + route, entry['description']), encoding='utf-8')
-        cards.append(f'<article class="entry"><div class="meta">{label} · {html.escape(entry["status"])}</div><h2><a href="{route}">{html.escape(entry["title"])}</a></h2><p>{html.escape(entry["description"])}</p><a href="{route}">Read the build →</a></article>')
-    body = '<div class="kicker">Dinesh · Projects</div><h1>BuildLog</h1><p>Small tools and experiments, with a clear account of what works and what is still being explored.</p>' + ''.join(cards)
-    (directory / 'index.html').write_text(page('BuildLog', body, 'https://dineshdivi2.github.io/builds/', 'Projects by Dinesh: Public Record, IrisFlow and yt2apple.'), encoding='utf-8')
+        (folder / 'index.html').write_text(page(entry['title'], body, SITE + route, entry['description'], section='builds', card=entry['slug']), encoding='utf-8')
+        share_card(entry['slug'], label, entry['title'], entry['description'], entry['status'])
+    intro = 'Small tools and experiments, with a clear account of what works and what is still being explored.'
+    body = f'<div class="kicker">Dinesh · Projects</div><h1>BuildLog</h1><p>{intro}</p><div class="items">' + ''.join(build_item(e, 'h2') for e in entries) + '</div>'
+    (directory / 'index.html').write_text(page('BuildLog', body, SITE + '/builds/', 'Projects by Dinesh: Public Record, IrisFlow and yt2apple.', section='builds', card='builds'), encoding='utf-8')
+    share_card('builds', 'Dinesh · Projects', 'BuildLog', intro)
+    return entries
 
 
 if __name__ == '__main__':

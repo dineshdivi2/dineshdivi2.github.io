@@ -23,6 +23,8 @@ For text and navigation edits, `python build_site.py --pages-only` keeps the exi
 
 BuildLog validation, 21 October 2026: the existing Python 3.12 virtual environment successfully ran `build_site.py --pages-only`; seven HTML pages passed heading, language, main landmark, local-link and anchor checks. Article Markdown and ArticleLog metadata were unchanged. `git diff --check` passed. Localhost browser previews timed out in both the in-app browser and Chrome, so visual QA remains outstanding. This increment is prepared locally, not deployed.
 
+Navigation and link-preview update, 21 October 2026: the homepage lists each entry with its status badge, the top bar names the site and marks the current section, and build pages link to the previous and next build. Every build also writes text-only 1200×630 share cards to `assets/og/` and the touch icon `assets/icon-180.png`; `favicon.svg` is hand-written. The cards and icon are generated with matplotlib and rebuild byte-for-byte identically. The article keeps its first figure as its share image. Checked with local headless-browser screenshots at desktop width, a 375px overflow check, and heading, metadata, local-link and anchor checks on all seven pages.
+
 GitHub Pages serves the static files from `main` at `/`. `.nojekyll` bypasses Jekyll processing. Build dependencies and local environments are excluded from Git.
 
 ## Publication edition, 16 October 2026
