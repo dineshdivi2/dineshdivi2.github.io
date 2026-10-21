@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; base-uri 'none'">
+<title>yt2apple · Dinesh</title><meta name="description" content="Capture a YouTube Music queue, review song metadata and hand it to TuneMyMusic for transfer to Apple Music.">
+<link rel="canonical" href="https://dineshdivi2.github.io/builds/003-yt2apple/"><meta property="og:type" content="website">
+<meta property="og:title" content="yt2apple"><meta property="og:description" content="Capture a YouTube Music queue, review song metadata and hand it to TuneMyMusic for transfer to Apple Music."><meta property="og:url" content="https://dineshdivi2.github.io/builds/003-yt2apple/">
+<meta name="twitter:card" content="summary">
+<style>
+:root{color-scheme:light;--ink:#182f40;--muted:#526777;--accent:#137777;--line:#dce5ea;--wash:#eef6f5}
+*{box-sizing:border-box}html{scroll-padding-top:24px}body{margin:0;background:#f1f5f7;color:var(--ink);font:18px/1.75 Georgia,'Times New Roman',serif}
+a{color:var(--accent);text-underline-offset:3px;overflow-wrap:anywhere}a:focus-visible,summary:focus-visible{outline:3px solid #e8a347;outline-offset:4px}
+.site-nav{max-width:1090px;margin:22px auto;padding:0 26px;display:flex;flex-wrap:wrap;gap:12px 24px;font:14px/1.5 system-ui,sans-serif}
+main{max-width:1090px;margin:20px auto 64px;padding:42px 64px 54px;background:white;border:1px solid var(--line);border-radius:8px}
+main>*{max-width:780px;margin-left:auto;margin-right:auto}h1{font-size:40px;line-height:1.16;letter-spacing:-.015em;margin:14px auto 20px;overflow-wrap:normal}
+h2{font-size:26px;line-height:1.3;margin-top:44px;padding-top:16px;border-top:1px solid var(--line)}h3{font-size:21px;margin-top:28px;color:var(--accent)}
+.meta,.contents,.footer,figcaption,.kicker{font:13px/1.65 system-ui,sans-serif;color:var(--muted)}.kicker{color:var(--accent);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:22px}.contents{padding:14px 0;border-block:1px solid var(--line);margin-bottom:30px}.contents nav{columns:2;column-gap:26px;padding-top:10px}.contents a{display:block;padding:3px 0;break-inside:avoid;text-decoration:none}
+summary{cursor:pointer;color:var(--accent);font-weight:600}blockquote{background:var(--wash);border-left:4px solid var(--accent);padding:12px 22px;border-radius:0 6px 6px 0}blockquote p{margin:5px 0}
+figure{max-width:960px;margin-top:28px;margin-bottom:30px}figure img{width:100%;height:auto;border:1px solid var(--line);border-radius:6px}figcaption{margin-top:10px}
+.table-wrap{overflow-x:auto;max-width:960px}table{border-collapse:collapse;width:100%;font:14px/1.6 system-ui,sans-serif}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top;min-width:140px}th{background:#f7fafb}
+code{font:14px/1.5 ui-monospace,monospace;background:#f3f6f7;padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}li{margin:8px 0}.footer{margin-top:38px;padding-top:18px;border-top:1px solid var(--line)}
+.entry{padding:24px 0;border-block:1px solid var(--line);margin-top:28px}.entry h2{border:0;padding:0;margin:8px 0}.skip{position:absolute;left:-9999px}.skip:focus{left:12px;top:8px;background:white;padding:8px;z-index:2}
+@media(max-width:760px){main{padding:28px 20px;margin:12px 10px 40px}h1{font-size:31px}h2{font-size:24px}.contents nav{columns:1}.site-nav{padding:0 20px}}
+@media print{body{background:white}main{margin:0;border:0;padding:0}.site-nav,.contents{display:none}h2,figure{break-inside:avoid}a{color:inherit}}
+</style></head><body><a class="skip" href="#content">Skip to content</a>
+<nav class="site-nav" aria-label="Site"><a href="/">Home</a><a href="/articles/">ArticleLog</a><a href="/builds/">BuildLog</a></nav>
+<main id="content"><div class="kicker">BuildLog 003</div><p class="meta">Browser extension prototype</p><h1>yt2apple</h1>
+<p>A small browser extension for taking a personal YouTube Music queue toward an Apple Music playlist.</p>
+<h2>The idea</h2>
+<p>Recommendations often live in one service while listening happens in another. The useful bridge is the song metadata: capture it, clean it up, let the listener review it and hand it to a transfer service.</p>
+<h2>What is built</h2>
+<ul>
+<li>Capture loaded songs from YouTube Music's queue in Chrome or Edge.</li>
+<li>Review checked tracks and edit song details before export.</li>
+<li>Download a CSV or send the selected source metadata to TuneMyMusic.</li>
+<li>Use an optional Apple catalog matcher to inspect candidates and retry unresolved songs.</li>
+</ul>
+<p>The extension preserves manual choices and supports session backups. Optional catalog matching uses request spacing, bounded concurrency and cached searches. Audio is not downloaded or transcribed.</p>
+<h2>Where it stands</h2>
+<p>The default workflow delegates Apple matching and transfer to TuneMyMusic. The extension itself does not create an Apple Music library playlist. Ambiguous titles, singers and recording variants still need review; a match is not a guarantee that the intended recording was selected.</p>
+<p>The documented remaining verification step is a signed-in, end-to-end personal transfer. This is a working prototype, not a broad catalog-accuracy benchmark.</p><footer class="footer"><a href="https://x.com/getsetahead/status/2109368377001275548">Original BuildLog 003 post on X</a> · <a href="/builds/">All builds</a></footer></main></body></html>

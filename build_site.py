@@ -165,21 +165,22 @@ code{font:14px/1.5 ui-monospace,monospace;background:#f3f6f7;padding:2px 5px;bor
 
 
 def page(title, body, canonical, description, article=False):
-    og_image = URL + 'assets/essay_b_input_bill.png'
+    social_image = f'<meta property="og:image" content="{URL}assets/essay_b_input_bill.png">' if canonical.startswith(URL) else ''
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; base-uri 'none'">
-<title>{html.escape(title)} · ArticleLog</title><meta name="description" content="{html.escape(description, quote=True)}">
+<title>{html.escape(title)} · Dinesh</title><meta name="description" content="{html.escape(description, quote=True)}">
 <link rel="canonical" href="{canonical}"><meta property="og:type" content="{'article' if article else 'website'}">
 <meta property="og:title" content="{html.escape(title, quote=True)}"><meta property="og:description" content="{html.escape(description, quote=True)}"><meta property="og:url" content="{canonical}">
-<meta property="og:image" content="{og_image}"><meta name="twitter:card" content="summary_large_image">
+{social_image}<meta name="twitter:card" content="{'summary_large_image' if social_image else 'summary'}">
 <style>{CSS}</style></head><body><a class="skip" href="#content">Skip to content</a>
-<nav class="site-nav" aria-label="Site"><a href="/">Home</a><a href="/articles/">ArticleLog</a><a href="{REPO}">Simulation repository</a></nav>
+<nav class="site-nav" aria-label="Site"><a href="/">Home</a><a href="/articles/">ArticleLog</a><a href="/builds/">BuildLog</a></nav>
 <main id="content">{body}</main></body></html>'''
 
 
 def build():
-    figures()
+    if '--pages-only' not in sys.argv:
+        figures()
     md = (ARTICLE / 'article.md').read_text(encoding='utf-8')
     assert md.splitlines()[0] == '# ' + TITLE
     body = markdown.markdown(md, extensions=['tables', 'toc', 'sane_lists'])
@@ -202,9 +203,33 @@ def build():
     index_body = f'''<div class="kicker">Dinesh · Technical writing</div><h1>ArticleLog</h1><p>Investigations into AI systems, agent workflows and the costs behind them.</p>
     <p class="meta">1 published article · Next entry: 002</p><article class="entry"><div class="meta">001 · 16 October 2026 · Exploratory simulation</div><h2><a href="/articles/001-agent-cache-economics/">{html.escape(TITLE)}</a></h2><p>{description}</p><p><a href="/articles/001-agent-cache-economics/">Read the article →</a></p></article>'''
     (ROOT / 'articles/index.html').write_text(page('ArticleLog', index_body, 'https://dineshdivi2.github.io/articles/', 'Technical articles by Dinesh.'), encoding='utf-8')
-    (ROOT / 'index.html').write_text(page('ArticleLog', index_body, 'https://dineshdivi2.github.io/', 'Technical articles by Dinesh.'), encoding='utf-8')
+    build_logs()
+    home = '''<div class="kicker">Dinesh · Building &amp; writing</div><h1>Things I build.<br>Systems I investigate.</h1>
+    <p>A small collection of projects and technical writing about AI systems, software and the decisions behind them.</p>
+    <section class="entry"><h2><a href="/articles/">ArticleLog</a></h2><p>Investigations into agent workflows and infrastructure economics.</p><p><a href="/articles/001-agent-cache-economics/">001 — The 88-Hour Cache Problem →</a></p></section>
+    <section class="entry"><h2><a href="/builds/">BuildLog</a></h2><p>Three projects, what they do, and where they stand.</p><ul><li><a href="/builds/001-public-record/">001 — Public Record</a></li><li><a href="/builds/002-irisflow/">002 — IrisFlow</a></li><li><a href="/builds/003-yt2apple/">003 — yt2apple</a></li></ul></section>
+    <footer class="footer"><a href="https://x.com/getsetahead">Follow on X</a> · <a href="https://github.com/dineshdivi2">GitHub</a></footer>'''
+    (ROOT / 'index.html').write_text(page('Home', home, 'https://dineshdivi2.github.io/', 'Projects and technical writing by Dinesh.'), encoding='utf-8')
     (ROOT / 'articles/index.json').write_text(json.dumps({'series':'ArticleLog','published_count':1,'next_number':2,'entries':[{'number':1,'title':TITLE,'published_at':'2026-10-16','url':URL,'repository_url':REPO}]},indent=2),encoding='utf-8')
     print(json.dumps({'article':str(ARTICLE/'index.html'),'figures':len(CAPTIONS),'words':words,'title':TITLE}))
+
+
+def build_logs():
+    directory = ROOT / 'builds'
+    data = json.loads((directory / 'index.json').read_text(encoding='utf-8'))
+    cards = []
+    for entry in data['entries']:
+        folder = directory / entry['slug']
+        source = (folder / 'build.md').read_text(encoding='utf-8')
+        body = markdown.markdown(source, extensions=['sane_lists'])
+        label = f"BuildLog {entry['number']:03d}"
+        body = f'<div class="kicker">{label}</div><p class="meta">{html.escape(entry["status"])}</p>' + body
+        body += f'<footer class="footer"><a href="{entry["post_url"]}">Original {label} post on X</a> · <a href="/builds/">All builds</a></footer>'
+        route = '/builds/' + entry['slug'] + '/'
+        (folder / 'index.html').write_text(page(entry['title'], body, 'https://dineshdivi2.github.io' + route, entry['description']), encoding='utf-8')
+        cards.append(f'<article class="entry"><div class="meta">{label} · {html.escape(entry["status"])}</div><h2><a href="{route}">{html.escape(entry["title"])}</a></h2><p>{html.escape(entry["description"])}</p><a href="{route}">Read the build →</a></article>')
+    body = '<div class="kicker">Dinesh · Projects</div><h1>BuildLog</h1><p>Small tools and experiments, with a clear account of what works and what is still being explored.</p>' + ''.join(cards)
+    (directory / 'index.html').write_text(page('BuildLog', body, 'https://dineshdivi2.github.io/builds/', 'Projects by Dinesh: Public Record, IrisFlow and yt2apple.'), encoding='utf-8')
 
 
 if __name__ == '__main__':

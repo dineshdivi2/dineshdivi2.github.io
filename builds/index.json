@@ -1,0 +1,29 @@
+{
+  "series": "BuildLog",
+  "entries": [
+    {
+      "number": 1,
+      "slug": "001-public-record",
+      "title": "Public Record",
+      "status": "Frontend MVP",
+      "description": "A civic-action prototype that turns an issue into an evidence-backed proposal and a draft for review.",
+      "post_url": "https://x.com/getsetahead/status/2106795492613161463"
+    },
+    {
+      "number": 2,
+      "slug": "002-irisflow",
+      "title": "IrisFlow",
+      "status": "Experimental desktop prototype",
+      "description": "Webcam-based gaze interaction for reading, pointer movement and deliberate gestures.",
+      "post_url": "https://x.com/getsetahead/status/2107886875147108387"
+    },
+    {
+      "number": 3,
+      "slug": "003-yt2apple",
+      "title": "yt2apple",
+      "status": "Browser extension prototype",
+      "description": "Capture a YouTube Music queue, review song metadata and hand it to TuneMyMusic for transfer to Apple Music.",
+      "post_url": "https://x.com/getsetahead/status/2109368377001275548"
+    }
+  ]
+}
