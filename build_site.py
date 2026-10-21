@@ -10,6 +10,7 @@ import re
 import json
 import html
 import textwrap
+import datetime
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / '.build-deps'))
@@ -164,6 +165,9 @@ code{font:14px/1.5 ui-monospace,monospace;background:#f3f6f7;padding:2px 5px;bor
 .items{margin-top:20px}.item{padding:22px 0;border-top:1px solid var(--line)}.item :is(h2,h3){border:0;padding:0;margin:6px 0 4px;font-size:24px;line-height:1.3}.item :is(h2,h3) a{text-decoration:none}.item :is(h2,h3) a:hover{text-decoration:underline}.item p{margin:6px 0}
 .item-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font:13px/1.6 system-ui,sans-serif;color:var(--muted)}.item-meta .kicker{font-size:12px}
 .badge{display:inline-block;padding:2px 10px;border:1px solid #c5e0dd;border-radius:999px;background:var(--wash);color:#0f6262;font:600 12px/1.6 system-ui,sans-serif;white-space:nowrap}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.x-icon{width:13px;height:13px;fill:currentColor;flex:none}.posted{display:inline-flex;align-items:center;gap:5px;color:var(--muted);text-decoration:none}.posted:hover{color:var(--accent);text-decoration:underline}
+.post{margin-top:44px;padding:18px 22px;border:1px solid var(--line);border-radius:8px}.post-head{display:flex;align-items:center;gap:7px;margin:0 0 10px;font:13px/1.5 system-ui,sans-serif;color:var(--muted)}
+.post blockquote{margin:0 0 12px;padding:0 0 0 16px;background:none;border-left:3px solid var(--accent);border-radius:0}.post blockquote p{margin:6px 0;font-size:17px;line-height:1.6}.post>a{font:14px/1.5 system-ui,sans-serif}
 .pager{display:flex;flex-wrap:wrap;gap:16px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font:15px/1.5 system-ui,sans-serif}.pager a{text-decoration:none}.pager small{display:block;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}.pager .next{margin-left:auto;text-align:right}.pager+.footer{border-top:0;margin-top:14px}
 @media(max-width:760px){main{padding:28px 20px;margin:12px 10px 40px}h1{font-size:31px}h2{font-size:24px}.item :is(h2,h3){font-size:22px}.contents nav{columns:1}.site-nav{padding:0 20px}}
 @media print{body{background:white}main{margin:0;border:0;padding:0}.site-nav,.contents{display:none}h2,figure{break-inside:avoid}a{color:inherit}}
@@ -279,9 +283,19 @@ def build():
     print(json.dumps({'article':str(ARTICLE/'index.html'),'figures':len(CAPTIONS),'words':words,'title':TITLE}))
 
 
+X_ICON = ('<svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>')
+
+
+def post_date(entry, month='%B'):
+    day = datetime.date.fromisoformat(entry['post_date'])
+    return f'{day.day} {day:{month} %Y}'
+
+
 def build_item(entry, tag):
     route = '/builds/' + entry['slug'] + '/'
-    return (f'<article class="item"><div class="item-meta"><span>BuildLog {entry["number"]:03d}</span><span class="badge">{html.escape(entry["status"])}</span></div>'
+    posted = (f'<a class="posted" href="{entry["post_url"]}">{X_ICON}<span>Posted <time datetime="{entry["post_date"]}">{post_date(entry, "%b")}</time>'
+              f'<span class="sr-only"> on X</span></span></a>')
+    return (f'<article class="item"><div class="item-meta"><span>BuildLog {entry["number"]:03d}</span><span class="badge">{html.escape(entry["status"])}</span>{posted}</div>'
             f'<{tag}><a href="{route}">{html.escape(entry["title"])}</a></{tag}><p>{html.escape(entry["description"])}</p></article>')
 
 
@@ -302,8 +316,14 @@ def build_logs():
         if i < len(entries) - 1:
             nxt = entries[i + 1]
             pager.append(f'<a class="next" href="/builds/{nxt["slug"]}/"><small>Next</small>{nxt["number"]:03d} · {html.escape(nxt["title"])} →</a>')
+        # BuildLog 003's post is a bare link, so its card shows only the date and link.
+        quote = ''.join(f'<p>{html.escape(line)}</p>' for line in entry.get('post_text', []))
+        body += (f'<aside class="post" aria-label="Original post on X"><p class="post-head">{X_ICON}<span>@getsetahead · Posted '
+                 f'<time datetime="{entry["post_date"]}">{post_date(entry)}</time></span></p>'
+                 + (f'<blockquote>{quote}</blockquote>' if quote else '')
+                 + f'<a href="{entry["post_url"]}">View the original {label} post on X →</a></aside>')
         body += f'<nav class="pager" aria-label="More builds">{"".join(pager)}</nav>'
-        body += f'<footer class="footer"><a href="{entry["post_url"]}">Original {label} post on X</a> · <a href="/builds/">All builds</a></footer>'
+        body += '<footer class="footer"><a href="/builds/">All builds</a></footer>'
         route = '/builds/' + entry['slug'] + '/'
         (folder / 'index.html').write_text(page(entry['title'], body, SITE + route, entry['description'], section='builds', card=entry['slug']), encoding='utf-8')
         share_card(entry['slug'], label, entry['title'], entry['description'], entry['status'])
