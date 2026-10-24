@@ -282,19 +282,19 @@ def build():
     home_description = 'Working notes on AI systems by Dinesh: long-form investigations, plus small product sketches built along the way.'
     feature = f'''<article class="feature"><div><div class="item-meta"><span>ArticleLog 001</span><time datetime="2026-10-16">16 Oct 2026</time><span class="badge">Exploratory simulation</span></div>
     <h3><a href="/articles/001-agent-cache-economics/">{html.escape(TITLE)}</a></h3>
-    <p class="finding">Agents can keep their history and still lose their cache. Whether keeping it warm pays off depends on the shape of the waiting.</p>
+    <p class="finding">Your agent remembers the whole conversation. The provider's cache forgot it an hour ago, and you pay to rebuild it. Whether that's worth fixing depends on how the agent waits.</p>
     <div class="chips"><span class="chip">{round(words/230)} min read</span><span class="chip">7 figures</span><span class="chip">1.0M trace calls</span><span class="chip">Reproducible repo</span></div>
     <p><a class="read" href="/articles/001-agent-cache-economics/">Read the investigation →</a></p></div>
     <figure><a href="/articles/001-agent-cache-economics/" tabindex="-1" aria-hidden="true"><img src="/articles/001-agent-cache-economics/assets/v3_1_measured_survival.png" alt="" loading="lazy"></a></figure></article>'''
     home = f'''<header class="hero"><div class="kicker">Dinesh · Working notes</div><h1>Building things, writing down what I <em>learn</em>.</h1>
-    <p class="lede">Long-form investigations into how AI systems behave and what they cost, plus a few small product sketches along the way.</p>
-    <span class="now"><span class="dot" aria-hidden="true"></span><span><b>Now writing:</b> ArticleLog 002, on prompt-cache retention guarantees</span></span></header>
+    <p class="lede">Mostly AI systems. When something doesn't add up, I keep digging until it does, then write it down. Now and then I build the thing I wished existed.</p>
+    <span class="now"><span class="dot" aria-hidden="true"></span><span><b>Now writing:</b> ArticleLog 002, on what changes when a cache comes with a promise</span></span></header>
     <section aria-labelledby="articlelog"><div class="section-head"><h2 id="articlelog">ArticleLog</h2><a href="/articles/">All articles →</a></div>
-    <p>Small observations, investigated properly: measured where possible, labelled when they are not.</p>{feature}
-    <div class="next-entry"><b>002</b><span>In progress: what changes when a prompt cache goes from best effort to a stated retention guarantee.</span></div>
+    <p>Small things I noticed and followed further than I meant to. Measured where I could, labelled where I couldn't.</p>{feature}
+    <div class="next-entry"><b>002</b><span>In progress: a prompt cache used to be "best effort". What happens when it becomes a promise?</span></div>
     <p class="labels"><span><i></i>Every entry carries an evidence label</span><span>Exploratory · Measured · Documentation analysis · Opinion</span></p></section>
     <section aria-labelledby="buildlog"><div class="section-head"><h2 id="buildlog">BuildLog</h2><a href="/builds/">All sketches →</a></div>
-    <p>Things I wished existed, so I sketched a working version. Rough by design.</p><div class="sketches">{''.join(sketch(e) for e in builds)}</div></section>
+    <p>Things I wished existed, so I built a rough version. Rough on purpose. Mostly.</p><div class="sketches">{''.join(sketch(e) for e in builds)}</div></section>
     <footer class="footer"><a href="https://x.com/getsetahead">Follow on X</a> · <a href="https://github.com/dineshdivi2">GitHub</a></footer>'''
     (ROOT / 'index.html').write_text(page('Dinesh — Working notes on AI systems', home, SITE + '/', home_description, section='home', card='home'), encoding='utf-8')
     share_card('home', 'Dinesh · Working notes', 'Building things, writing\ndown what I learn.', home_description)
