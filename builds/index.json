@@ -6,6 +6,7 @@
       "slug": "001-public-record",
       "title": "Public Record",
       "status": "Frontend MVP",
+      "gap": "Lots of people share the same civic complaint, but there's no easy way to turn it into a proposal someone would act on.",
       "description": "A civic-action prototype that turns an issue into an evidence-backed proposal and a draft for review.",
       "post_url": "https://x.com/getsetahead/status/2106795492613161463",
       "post_date": "2026-10-04",
@@ -20,6 +21,7 @@
       "slug": "002-irisflow",
       "title": "IrisFlow",
       "status": "Experimental desktop prototype",
+      "gap": "My webcam already sees where I'm looking. Why can't my laptop act on it?",
       "description": "Webcam-based gaze interaction for reading, pointer movement and deliberate gestures.",
       "post_url": "https://x.com/getsetahead/status/2107886875147108387",
       "post_date": "2026-10-07",
@@ -34,6 +36,7 @@
       "slug": "003-yt2apple",
       "title": "yt2apple",
       "status": "Browser extension prototype",
+      "gap": "Moving from YouTube Music to Apple Music meant rebuilding my queue song by song.",
       "description": "Capture a YouTube Music queue, review song metadata and hand it to TuneMyMusic for transfer to Apple Music.",
       "post_url": "https://x.com/getsetahead/status/2109368377001275548",
       "post_date": "2026-10-11"

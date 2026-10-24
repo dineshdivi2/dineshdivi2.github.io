@@ -169,6 +169,19 @@ code{font:14px/1.5 ui-monospace,monospace;background:#f3f6f7;padding:2px 5px;bor
 .post{margin-top:44px;padding:18px 22px;border:1px solid var(--line);border-radius:8px}.post-head{display:flex;align-items:center;gap:7px;margin:0 0 10px;font:13px/1.5 system-ui,sans-serif;color:var(--muted)}
 .post blockquote{margin:0 0 12px;padding:0 0 0 16px;background:none;border-left:3px solid var(--accent);border-radius:0}.post blockquote p{margin:6px 0;font-size:17px;line-height:1.6}.post>a{font:14px/1.5 system-ui,sans-serif}
 .pager{display:flex;flex-wrap:wrap;gap:16px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font:15px/1.5 system-ui,sans-serif}.pager a{text-decoration:none}.pager small{display:block;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}.pager .next{margin-left:auto;text-align:right}.pager+.footer{border-top:0;margin-top:14px}
+.hero{position:relative;padding:18px 0 8px}.hero::before{content:'';position:absolute;inset:-42px -64px 0;z-index:0;pointer-events:none;background:radial-gradient(#cfdde3 1px,transparent 1.2px) 0 0/18px 18px;mask-image:linear-gradient(#000,transparent 92%);-webkit-mask-image:linear-gradient(#000,transparent 92%)}.hero>*{position:relative}
+.hero h1{font-size:46px;font-weight:400;letter-spacing:-.02em;margin-bottom:14px}.hero h1 em{font-style:italic;color:var(--accent);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8c40-6 90-7 196-2' fill='none' stroke='%23e8a347' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") bottom/100% 10px no-repeat;padding-bottom:6px}
+.hero .lede{color:var(--muted);font-size:19px;margin:0 0 18px}.now{display:inline-flex;align-items:center;gap:9px;padding:5px 14px;border:1px solid var(--line);border-radius:999px;background:white;font:13px/1.5 system-ui,sans-serif;color:var(--muted)}.now b{color:var(--ink);font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:#e8a347;box-shadow:0 0 0 0 #e8a34780;animation:pulse 2.4s infinite}@keyframes pulse{70%{box-shadow:0 0 0 7px #e8a34700}100%{box-shadow:0 0 0 0 #e8a34700}}@media(prefers-reduced-motion:reduce){.dot{animation:none}}
+.feature{display:grid;grid-template-columns:1.25fr 1fr;gap:26px;align-items:center;margin-top:22px;padding:24px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fbfdfd,#fff)}.feature h3{font-size:26px;line-height:1.25;margin:8px 0 10px;color:var(--ink)}.feature h3 a{color:inherit;text-decoration:none}.feature h3 a:hover{text-decoration:underline}
+.finding{margin:12px 0;padding-left:14px;border-left:3px solid #e8a347;font-style:italic;color:#304656}.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.chip{padding:2px 10px;border-radius:6px;background:#f3f6f7;font:12px/1.7 system-ui,sans-serif;color:var(--muted)}
+.feature figure{margin:0}.feature img{display:block;width:100%;border:1px solid var(--line);border-radius:6px}.read{font:600 14px/1.5 system-ui,sans-serif}
+.next-entry{display:flex;gap:14px;align-items:baseline;margin-top:12px;padding:14px 18px;border:1px dashed #c9d6dc;border-radius:10px;font:14px/1.6 system-ui,sans-serif;color:var(--muted)}.next-entry b{color:var(--ink)}
+.labels{margin-top:14px;font:12px/1.7 system-ui,sans-serif;color:var(--muted)}.labels span{margin-right:12px}.labels i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:var(--accent)}
+.sketches{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:18px}.sketch{display:flex;flex-direction:column;padding:18px;border:1px solid var(--line);border-radius:10px;background:#fcfbf7;text-decoration:none;color:var(--ink);transition:transform .15s,box-shadow .15s}.sketch:hover{transform:translateY(-2px);box-shadow:0 6px 18px #182f4012}
+.sketch .no{font:12px/1.5 ui-monospace,monospace;color:var(--muted)}.sketch .gap{font-size:16px;line-height:1.5;margin:10px 0 12px}.sketch .gap::before{content:'“';color:#e8a347;font-size:26px;line-height:0;vertical-align:-8px;margin-right:2px}.sketch b{font:600 17px/1.4 system-ui,sans-serif}.sketch .what{font:14px/1.55 system-ui,sans-serif;color:var(--muted);margin:4px 0 14px;flex:1}.sketch .badge{align-self:flex-start}
+.spark{margin:4px 0 18px;padding:14px 18px;background:#fcfbf7;border:1px solid var(--line);border-radius:8px;font-style:italic}.spark small{display:block;font:600 11px/1.6 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;font-style:normal;color:#b5762a}
+@media(max-width:760px){.feature{grid-template-columns:1fr;padding:18px}.hero h1{font-size:34px}.hero::before{inset:-28px -20px 0}}
 @media(max-width:760px){main{padding:28px 20px;margin:12px 10px 40px}h1{font-size:31px}h2{font-size:24px}.item :is(h2,h3){font-size:22px}.contents nav{columns:1}.site-nav{padding:0 20px}}
 @media print{body{background:white}main{margin:0;border:0;padding:0}.site-nav,.contents{display:none}h2,figure{break-inside:avoid}a{color:inherit}}
 '''
@@ -266,17 +279,25 @@ def build():
     <p class="meta">1 published article · Next entry: 002</p><div class="items">{article_item.replace('TAG', 'h2')}</div>'''
     (ROOT / 'articles/index.html').write_text(page('ArticleLog', index_body, SITE + '/articles/', 'Technical articles by Dinesh.', section='articles', card='articles'), encoding='utf-8')
     builds = build_logs()
-    build_items = ''.join(build_item(entry, 'h3') for entry in builds)
-    home_description = 'Projects and technical writing by Dinesh on AI systems, agent workflows and software.'
-    home = f'''<div class="kicker">Dinesh · Building &amp; writing</div><h1>Things I build.<br>Systems I investigate.</h1>
-    <p>A small collection of projects and technical writing about AI systems, software and the decisions behind them.</p>
+    home_description = 'Working notes on AI systems by Dinesh: long-form investigations, plus small product sketches built along the way.'
+    feature = f'''<article class="feature"><div><div class="item-meta"><span>ArticleLog 001</span><time datetime="2026-10-16">16 Oct 2026</time><span class="badge">Exploratory simulation</span></div>
+    <h3><a href="/articles/001-agent-cache-economics/">{html.escape(TITLE)}</a></h3>
+    <p class="finding">Agents can keep their history and still lose their cache. Whether keeping it warm pays off depends on the shape of the waiting.</p>
+    <div class="chips"><span class="chip">{round(words/230)} min read</span><span class="chip">7 figures</span><span class="chip">1.0M trace calls</span><span class="chip">Reproducible repo</span></div>
+    <p><a class="read" href="/articles/001-agent-cache-economics/">Read the investigation →</a></p></div>
+    <figure><a href="/articles/001-agent-cache-economics/" tabindex="-1" aria-hidden="true"><img src="/articles/001-agent-cache-economics/assets/v3_1_measured_survival.png" alt="" loading="lazy"></a></figure></article>'''
+    home = f'''<header class="hero"><div class="kicker">Dinesh · Working notes</div><h1>Building things, writing down what I <em>learn</em>.</h1>
+    <p class="lede">Long-form investigations into how AI systems behave and what they cost, plus a few small product sketches along the way.</p>
+    <span class="now"><span class="dot" aria-hidden="true"></span><span><b>Now writing:</b> ArticleLog 002, on prompt-cache retention guarantees</span></span></header>
     <section aria-labelledby="articlelog"><div class="section-head"><h2 id="articlelog">ArticleLog</h2><a href="/articles/">All articles →</a></div>
-    <p>Investigations into agent workflows and infrastructure economics.</p><div class="items">{article_item.replace('TAG', 'h3')}</div></section>
-    <section aria-labelledby="buildlog"><div class="section-head"><h2 id="buildlog">BuildLog</h2><a href="/builds/">All builds →</a></div>
-    <p>Projects, what they do, and where they stand.</p><div class="items">{build_items}</div></section>
+    <p>Small observations, investigated properly: measured where possible, labelled when they are not.</p>{feature}
+    <div class="next-entry"><b>002</b><span>In progress: what changes when a prompt cache goes from best effort to a stated retention guarantee.</span></div>
+    <p class="labels"><span><i></i>Every entry carries an evidence label</span><span>Exploratory · Measured · Documentation analysis · Opinion</span></p></section>
+    <section aria-labelledby="buildlog"><div class="section-head"><h2 id="buildlog">BuildLog</h2><a href="/builds/">All sketches →</a></div>
+    <p>Things I wished existed, so I sketched a working version. Rough by design.</p><div class="sketches">{''.join(sketch(e) for e in builds)}</div></section>
     <footer class="footer"><a href="https://x.com/getsetahead">Follow on X</a> · <a href="https://github.com/dineshdivi2">GitHub</a></footer>'''
-    (ROOT / 'index.html').write_text(page('Dinesh — Projects and technical writing', home, SITE + '/', home_description, section='home', card='home'), encoding='utf-8')
-    share_card('home', 'Dinesh · Building & writing', 'Things I build.\nSystems I investigate.', home_description)
+    (ROOT / 'index.html').write_text(page('Dinesh — Working notes on AI systems', home, SITE + '/', home_description, section='home', card='home'), encoding='utf-8')
+    share_card('home', 'Dinesh · Working notes', 'Building things, writing\ndown what I learn.', home_description)
     share_card('articles', 'Dinesh · Technical writing', 'ArticleLog', 'Investigations into AI systems, agent workflows and the costs behind them.')
     icon()
     (ROOT / 'articles/index.json').write_text(json.dumps({'series':'ArticleLog','published_count':1,'next_number':2,'entries':[{'number':1,'title':TITLE,'published_at':'2026-10-16','url':URL,'repository_url':REPO}]},indent=2),encoding='utf-8')
@@ -299,6 +320,13 @@ def build_item(entry, tag):
             f'<{tag}><a href="{route}">{html.escape(entry["title"])}</a></{tag}><p>{html.escape(entry["description"])}</p></article>')
 
 
+def sketch(entry):
+    # Casual card: the missing thing first, then what was built and where it stands.
+    return (f'<a class="sketch" href="/builds/{entry["slug"]}/"><span class="no">BuildLog {entry["number"]:03d} · {post_date(entry, "%b")}</span>'
+            f'<span class="gap">{html.escape(entry["gap"])}</span><b>{html.escape(entry["title"])}</b>'
+            f'<span class="what">{html.escape(entry["description"])}</span><span class="badge">{html.escape(entry["status"])}</span></a>')
+
+
 def build_logs():
     directory = ROOT / 'builds'
     data = json.loads((directory / 'index.json').read_text(encoding='utf-8'))
@@ -308,6 +336,8 @@ def build_logs():
         source = (folder / 'build.md').read_text(encoding='utf-8')
         body = markdown.markdown(source, extensions=['sane_lists'])
         label = f"BuildLog {entry['number']:03d}"
+        h1end = body.index('</h1>') + len('</h1>')
+        body = body[:h1end] + f'<p class="spark"><small>The missing thing</small>{html.escape(entry["gap"])}</p>' + body[h1end:]
         body = f'<div class="item-meta"><span class="kicker">{label}</span><span class="badge">{html.escape(entry["status"])}</span></div>' + body
         pager = []
         if i > 0:
@@ -327,8 +357,8 @@ def build_logs():
         route = '/builds/' + entry['slug'] + '/'
         (folder / 'index.html').write_text(page(entry['title'], body, SITE + route, entry['description'], section='builds', card=entry['slug']), encoding='utf-8')
         share_card(entry['slug'], label, entry['title'], entry['description'], entry['status'])
-    intro = 'Small tools and experiments, with a clear account of what works and what is still being explored.'
-    body = f'<div class="kicker">Dinesh · Projects</div><h1>BuildLog</h1><p>{intro}</p><div class="items">' + ''.join(build_item(e, 'h2') for e in entries) + '</div>'
+    intro = 'Things I wished existed, so I sketched a working version. Each one starts from a missing product or feature and stays honest about how rough it is.'
+    body = f'<div class="kicker">Dinesh · Product sketches</div><h1>BuildLog</h1><p>{intro}</p><div class="sketches">' + ''.join(sketch(e) for e in entries) + '</div>'
     (directory / 'index.html').write_text(page('BuildLog', body, SITE + '/builds/', 'Projects by Dinesh: Public Record, IrisFlow and yt2apple.', section='builds', card='builds'), encoding='utf-8')
     share_card('builds', 'Dinesh · Projects', 'BuildLog', intro)
     return entries
