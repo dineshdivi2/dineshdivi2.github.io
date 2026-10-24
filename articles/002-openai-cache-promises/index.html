@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; base-uri 'none'">
+<title>30 Minutes, 12 Hours, Forever: Decoding OpenAI&#x27;s Three Cache Promises · Dinesh</title><meta name="description" content="What OpenAI&#x27;s 30-minute, 12-hour and Codex &quot;forever&quot; cache promises actually guarantee, what they reveal about the machinery underneath, and the two-return rule for when 12 hours pays.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/assets/icon-180.png" sizes="180x180"><link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="canonical" href="https://dineshdivi2.github.io/articles/002-openai-cache-promises/"><meta property="og:type" content="article"><meta property="og:site_name" content="Dinesh">
+<meta property="og:title" content="30 Minutes, 12 Hours, Forever: Decoding OpenAI&#x27;s Three Cache Promises"><meta property="og:description" content="What OpenAI&#x27;s 30-minute, 12-hour and Codex &quot;forever&quot; cache promises actually guarantee, what they reveal about the machinery underneath, and the two-return rule for when 12 hours pays."><meta property="og:url" content="https://dineshdivi2.github.io/articles/002-openai-cache-promises/">
+<meta property="og:image" content="https://dineshdivi2.github.io/assets/og/002-openai-cache-promises.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="30 Minutes, 12 Hours, Forever: Decoding OpenAI&#x27;s Three Cache Promises"><meta name="twitter:card" content="summary_large_image">
+<style>
+:root{color-scheme:light;--ink:#182f40;--muted:#526777;--accent:#137777;--line:#dce5ea;--wash:#eef6f5}
+*{box-sizing:border-box}html{scroll-padding-top:24px}body{margin:0;background:#f1f5f7;color:var(--ink);font:18px/1.75 Georgia,'Times New Roman',serif}
+a{color:var(--accent);text-underline-offset:3px;overflow-wrap:anywhere}a:focus-visible,summary:focus-visible{outline:3px solid #e8a347;outline-offset:4px}
+.site-nav{max-width:1090px;margin:22px auto;padding:0 26px;display:flex;flex-wrap:wrap;gap:12px 24px;font:14px/1.5 system-ui,sans-serif}
+main{max-width:1090px;margin:20px auto 64px;padding:42px 64px 54px;background:white;border:1px solid var(--line);border-radius:8px}
+main>*{max-width:780px;margin-left:auto;margin-right:auto}h1{font-size:40px;line-height:1.16;letter-spacing:-.015em;margin:14px auto 20px;overflow-wrap:normal}
+h2{font-size:26px;line-height:1.3;margin-top:44px;padding-top:16px;border-top:1px solid var(--line)}h3{font-size:21px;margin-top:28px;color:var(--accent)}
+.meta,.contents,.footer,figcaption,.kicker{font:13px/1.65 system-ui,sans-serif;color:var(--muted)}.kicker{color:var(--accent);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:22px}.contents{padding:14px 0;border-block:1px solid var(--line);margin-bottom:30px}.contents nav{columns:2;column-gap:26px;padding-top:10px}.contents a{display:block;padding:3px 0;break-inside:avoid;text-decoration:none}
+summary{cursor:pointer;color:var(--accent);font-weight:600}blockquote{background:var(--wash);border-left:4px solid var(--accent);padding:12px 22px;border-radius:0 6px 6px 0}blockquote p{margin:5px 0}
+figure{max-width:960px;margin-top:28px;margin-bottom:30px}figure img{width:100%;height:auto;border:1px solid var(--line);border-radius:6px}figcaption{margin-top:10px}
+.table-wrap{overflow-x:auto;max-width:960px}table{border-collapse:collapse;width:100%;font:14px/1.6 system-ui,sans-serif}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top;min-width:140px}th{background:#f7fafb}
+code{font:14px/1.5 ui-monospace,monospace;background:#f3f6f7;padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}li{margin:8px 0}.footer{margin-top:38px;padding-top:18px;border-top:1px solid var(--line)}
+.skip{position:absolute;left:-9999px}.skip:focus{left:12px;top:8px;background:white;padding:8px;z-index:2}
+.site-nav{align-items:baseline;font-size:15px}.site-nav .brand{margin-right:auto;color:var(--ink);font-weight:700;text-decoration:none}.site-nav a[aria-current]{color:var(--ink);font-weight:600;text-decoration-thickness:2px}
+.section-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 16px;margin-top:48px}.section-head h2{border:0;padding:0;margin:0}.section-head a{font:14px/1.5 system-ui,sans-serif}
+.items{margin-top:20px}.item{padding:22px 0;border-top:1px solid var(--line)}.item :is(h2,h3){border:0;padding:0;margin:6px 0 4px;font-size:24px;line-height:1.3}.item :is(h2,h3) a{text-decoration:none}.item :is(h2,h3) a:hover{text-decoration:underline}.item p{margin:6px 0}
+.item-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font:13px/1.6 system-ui,sans-serif;color:var(--muted)}.item-meta .kicker{font-size:12px}
+.badge{display:inline-block;padding:2px 10px;border:1px solid #c5e0dd;border-radius:999px;background:var(--wash);color:#0f6262;font:600 12px/1.6 system-ui,sans-serif;white-space:nowrap}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.x-icon{width:13px;height:13px;fill:currentColor;flex:none}.posted{display:inline-flex;align-items:center;gap:5px;color:var(--muted);text-decoration:none}.posted:hover{color:var(--accent);text-decoration:underline}
+.post{margin-top:44px;padding:18px 22px;border:1px solid var(--line);border-radius:8px}.post-head{display:flex;align-items:center;gap:7px;margin:0 0 10px;font:13px/1.5 system-ui,sans-serif;color:var(--muted)}
+.post blockquote{margin:0 0 12px;padding:0 0 0 16px;background:none;border-left:3px solid var(--accent);border-radius:0}.post blockquote p{margin:6px 0;font-size:17px;line-height:1.6}.post>a{font:14px/1.5 system-ui,sans-serif}
+.pager{display:flex;flex-wrap:wrap;gap:16px;margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font:15px/1.5 system-ui,sans-serif}.pager a{text-decoration:none}.pager small{display:block;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}.pager .next{margin-left:auto;text-align:right}.pager+.footer{border-top:0;margin-top:14px}
+.hero{position:relative;padding:18px 0 8px}.hero::before{content:'';position:absolute;inset:-42px -64px 0;z-index:0;pointer-events:none;background:radial-gradient(#cfdde3 1px,transparent 1.2px) 0 0/18px 18px;mask-image:linear-gradient(#000,transparent 92%);-webkit-mask-image:linear-gradient(#000,transparent 92%)}.hero>*{position:relative}
+.hero h1{font-size:46px;font-weight:400;letter-spacing:-.02em;margin-bottom:14px}.hero h1 em{font-style:italic;color:var(--accent);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8c40-6 90-7 196-2' fill='none' stroke='%23e8a347' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") bottom/100% 10px no-repeat;padding-bottom:6px}
+.hero .lede{color:var(--muted);font-size:19px;margin:0 0 18px}.now{display:inline-flex;align-items:center;gap:9px;padding:5px 14px;border:1px solid var(--line);border-radius:999px;background:white;font:13px/1.5 system-ui,sans-serif;color:var(--muted)}.now b{color:var(--ink);font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:#e8a347;box-shadow:0 0 0 0 #e8a34780;animation:pulse 2.4s infinite}@keyframes pulse{70%{box-shadow:0 0 0 7px #e8a34700}100%{box-shadow:0 0 0 0 #e8a34700}}@media(prefers-reduced-motion:reduce){.dot{animation:none}}
+.feature{display:grid;grid-template-columns:1.25fr 1fr;gap:26px;align-items:center;margin-top:22px;padding:24px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fbfdfd,#fff)}.feature h3{font-size:26px;line-height:1.25;margin:8px 0 10px;color:var(--ink)}.feature h3 a{color:inherit;text-decoration:none}.feature h3 a:hover{text-decoration:underline}
+.finding{margin:12px 0;padding-left:14px;border-left:3px solid #e8a347;font-style:italic;color:#304656}.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.chip{padding:2px 10px;border-radius:6px;background:#f3f6f7;font:12px/1.7 system-ui,sans-serif;color:var(--muted)}
+.feature figure{margin:0}.feature img{display:block;width:100%;border:1px solid var(--line);border-radius:6px}.read{font:600 14px/1.5 system-ui,sans-serif}
+.next-entry{display:flex;gap:14px;align-items:baseline;margin-top:12px;padding:14px 18px;border:1px dashed #c9d6dc;border-radius:10px;font:14px/1.6 system-ui,sans-serif;color:var(--muted)}.next-entry b{color:var(--ink)}
+.labels{margin-top:14px;font:12px/1.7 system-ui,sans-serif;color:var(--muted)}.labels span{margin-right:12px}.labels i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:var(--accent)}
+.sketches{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:18px}.sketch{display:flex;flex-direction:column;padding:18px;border:1px solid var(--line);border-radius:10px;background:#fcfbf7;text-decoration:none;color:var(--ink);transition:transform .15s,box-shadow .15s}.sketch:hover{transform:translateY(-2px);box-shadow:0 6px 18px #182f4012}
+.sketch .no{font:12px/1.5 ui-monospace,monospace;color:var(--muted)}.sketch .gap{font-size:16px;line-height:1.5;margin:10px 0 12px}.sketch .gap::before{content:'“';color:#e8a347;font-size:26px;line-height:0;vertical-align:-8px;margin-right:2px}.sketch b{font:600 17px/1.4 system-ui,sans-serif}.sketch .what{font:14px/1.55 system-ui,sans-serif;color:var(--muted);margin:4px 0 14px;flex:1}.sketch .badge{align-self:flex-start}
+.spark{margin:4px 0 18px;padding:14px 18px;background:#fcfbf7;border:1px solid var(--line);border-radius:8px;font-style:italic}.spark small{display:block;font:600 11px/1.6 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;font-style:normal;color:#b5762a}
+@media(max-width:760px){.feature{grid-template-columns:1fr;padding:18px}.hero h1{font-size:34px}.hero::before{inset:-28px -20px 0}}
+@media(max-width:760px){main{padding:28px 20px;margin:12px 10px 40px}h1{font-size:31px}h2{font-size:24px}.item :is(h2,h3){font-size:22px}.contents nav{columns:1}.site-nav{padding:0 20px}}
+@media print{body{background:white}main{margin:0;border:0;padding:0}.site-nav,.contents{display:none}h2,figure{break-inside:avoid}a{color:inherit}}
+</style></head><body><a class="skip" href="#content">Skip to content</a>
+<nav class="site-nav" aria-label="Site"><a class="brand" href="/">Dinesh</a><a href="/articles/" aria-current="true">ArticleLog</a><a href="/builds/">BuildLog</a></nav>
+<main id="content"><div class="kicker">ArticleLog 002 · Systems &amp; agents</div><div class="meta"><span>By Dinesh</span><time datetime="2026-10-24">24 October 2026</time><span>8 min read · 2 figures</span><span>Documentation analysis</span></div><h1 id="30-minutes-12-hours-forever-decoding-openais-three-cache-promises">30 Minutes, 12 Hours, Forever: Decoding OpenAI's Three Cache Promises</h1><details class="contents"><summary>In this article</summary><nav><a href="#1-the-real-change-is-one-word">1. The real change is one word</a><a href="#2-three-promises-one-company">2. Three promises, one company</a><a href="#3-what-article-001-proposed-and-what-arrived">3. What Article 001 proposed, and what arrived</a><a href="#4-what-the-docs-reveal-about-the-machinery">4. What the docs reveal about the machinery</a><a href="#5-when-the-12-hour-write-pays">5. When the 12-hour write pays</a><a href="#6-twelve-hours-is-not-a-rolling-lease">6. Twelve hours is not a rolling lease</a><a href="#7-the-next-miss-is-self-inflicted">7. The next miss is self-inflicted</a><a href="#8-what-ill-test-next">8. What I'll test next</a><a href="#sources-and-scope">Sources and scope</a></nav></details>
+<p><em>What each promise actually guarantees, what it reveals about the machinery underneath, and the two-return rule for when 12 hours pays.</em></p>
+<p>On 16 October I published <a href="https://dineshdivi2.github.io/articles/001-agent-cache-economics/">The 88-Hour Cache Problem</a>. It closed with the interface I wanted providers to offer: a "portable, priced retention and readiness contract." The client says when it expects to return; the provider says what it will commit to, and at what price.</p>
+<p>On 20 October, OpenAI <a href="https://developers.openai.com/api/docs/changelog#october-2026">shipped 12-hour prompt caching</a> in the Responses API, aimed at persistent agents that "reuse context throughout the day," with requests "hours apart."</p>
+<p>Shortly after, Tibo Sottiaux of OpenAI's Codex team <a href="https://x.com/thsottiaux/status/2112712984644784534">went further</a>:</p>
+<blockquote>
+<p>"for logged in users across Codex &amp; Work we keep cache forever and you don't have any penalty for coming back to an old conversation or resuming after a few hours and are now guaranteed to hit the cache."</p>
+</blockquote>
+<p>Thirty minutes, twelve hours and forever: three cache promises from one company within a day. Read together, they show what OpenAI is selling, what it is absorbing, and what it must have built to do either.</p>
+<h2 id="1-the-real-change-is-one-word">1. The real change is one word</h2>
+<p>The headline is 12 hours. The more important change is the word in front of it.</p>
+<p>The <a href="https://developers.openai.com/api/docs/guides/prompt-caching#cache-lifetime">prompt caching guide</a> keeps both generations side by side:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Earlier models</th>
+<th>GPT-5.6 and later</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Setting</td>
+<td><code>prompt_cache_retention</code>: <code>in_memory</code> or <code>24h</code></td>
+<td><code>prompt_cache_options.ttl</code>: <code>30m</code> (default) or <code>12h</code></td>
+</tr>
+<tr>
+<td>Lifetime</td>
+<td>"Typically 5 to 10 minutes" for <code>in_memory</code>; "up to 24 hours" for <code>24h</code></td>
+<td>"Minimum lifetime of 30 minutes or 12 hours"</td>
+</tr>
+<tr>
+<td>Write charge</td>
+<td>None</td>
+<td>1.25× input for <code>30m</code>, 2.5× for <code>12h</code></td>
+</tr>
+<tr>
+<td>Read charge</td>
+<td>Model-dependent</td>
+<td>0.1× input; <strong>0.05× on GPT-6.1 Sol</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>The old 24-hour option was a ceiling: the cache might survive a day, and usually lasted about half an hour. The new options are floors. For 12 hours after the write, OpenAI commits to billing a matching prefix as a cache read.</p>
+<p>A best-effort maximum became a priced minimum. That is the move from hint to commitment that Article 001 argued for, now written into the documentation.</p>
+<h2 id="2-three-promises-one-company">2. Three promises, one company</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Product</th>
+<th>The promise</th>
+<th>Price</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API, <code>30m</code></td>
+<td>Cached pricing for at least 30 min after the last use</td>
+<td>Write 1.25×, read 0.05–0.1×</td>
+<td>Documented</td>
+</tr>
+<tr>
+<td>API, <code>12h</code></td>
+<td>Cached pricing for at least 12 h after the write</td>
+<td>Write 2.5×, same read</td>
+<td>Documented, 20 Oct</td>
+</tr>
+<tr>
+<td>Codex &amp; Work, logged in</td>
+<td>"Keep cache forever", "guaranteed to hit", "no penalty"</td>
+<td>Inside the subscription</td>
+<td>Staff post; no documentation found</td>
+</tr>
+</tbody>
+</table></div>
+<p>The API documentation is careful exactly where the Codex post is bold:</p>
+<ul>
+<li>"Cache entries are not stored indefinitely."</li>
+<li>The cached KV tensors may be held in GPU-local storage "with a maximum retention period of 24 hours."</li>
+<li>The minimum lifetime "governs eligibility for cache-read pricing. It does not guarantee that every request reuses stored KV tensors or has lower latency."</li>
+</ul>
+<p>So how does Codex keep a cache "forever"?</p>
+<p>My read: <strong>"forever" describes accounting, not storage.</strong> In a subscription, a hit means the returning conversation is charged against your usage as a hit. Whether OpenAI kept the tensors, moved them to a cheaper tier or recomputed them is an implementation detail it has kept for itself.</p>
+<p>That's the same design the API uses: commit to a price, keep freedom over the mechanism. The API sells that commitment by the hour; the subscription absorbs it to make long-running threads feel free.</p>
+<h2 id="3-what-article-001-proposed-and-what-arrived">3. What Article 001 proposed, and what arrived</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Proposed in Article 001</th>
+<th>Shipped on 20–21 October</th>
+<th>Still missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client states how long a prefix is useful</td>
+<td><code>ttl: "12h"</code>, settable per breakpoint</td>
+<td>Arbitrary return windows; only two durations</td>
+</tr>
+<tr>
+<td>Retention carries an explicit price</td>
+<td>2.5× write, published</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Distinguish an advisory hint from a commitment</td>
+<td>"Up to" became "at least"</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Readiness by a deadline</td>
+<td>Partial: <code>prewarm: true</code>, billed as a write</td>
+<td>A latency or readiness commitment</td>
+</tr>
+<tr>
+<td>Release a cancelled branch</td>
+<td>—</td>
+<td>"Manual cache clearing is not currently available"</td>
+</tr>
+<tr>
+<td>One contract across providers</td>
+<td>—</td>
+<td>Each provider has its own interface</td>
+</tr>
+</tbody>
+</table></div>
+<p>Two arrived in full, two in part, two not at all. The missing rows all depend on what only the client knows: when a branch is dead, and when an answer is needed. That remains the next interface worth building.</p>
+<h2 id="4-what-the-docs-reveal-about-the-machinery">4. What the docs reveal about the machinery</h2>
+<p>When a model processes a prompt, it builds key–value (KV) tensors: its internal working state for every token. Prompt caching keeps that state so a later request with the same opening, or prefix, can skip recomputing it.</p>
+<p>The guide is unusually specific about where that state lives:</p>
+<ul>
+<li>"Cached states live on individual machines." A hit needs a request to reach "a machine holding a matching entry that has not expired."</li>
+<li>Routing uses a hash of the prompt's opening tokens plus an optional <code>prompt_cache_key</code>. Above "15 requests per minute," traffic "can lead to overflow routing" to machines without your entry.</li>
+<li>"OpenAI may retain entries longer than the requested minimum."</li>
+</ul>
+<p>So the cache is machine-local state behind load-aware routing. A 12-hour promise means OpenAI either keeps that state reachable for 12 hours, or absorbs the cost of rebuilding it while still charging the read price.</p>
+<p>This is part of a sequence. On 22 September OpenAI <a href="https://openai.com/index/better-prompt-caching-for-gpt-6/">launched</a> "an improved prompt caching system" with GPT-6, along with cache diagnostics and reasoning-effort changes that don't break the cache. GitHub reported that Copilot had cut "by more than 50%" the share of prompt tokens requiring fresh processing. The 12-hour floor is the next step of the same programme.</p>
+<p><strong>My inference, labelled as one.</strong> Two documented facts are hard to explain with cheaper storage alone:</p>
+<ol>
+<li><strong>The guaranteed lifetimes exist only on GPT-5.6 and later.</strong> A pure storage upgrade could have reached older models too.</li>
+<li><strong>Reads got cheaper on the newest model.</strong> GPT-6.1 Sol charges 0.05× for a cached read, half the 0.1× on other new models.</li>
+</ol>
+<p>Both fit models whose KV state is smaller and cheaper to keep or restore. DeepSeek has <a href="https://arxiv.org/abs/2609.19969">published one way to do that</a>: cross-layer KV reuse and 4-bit KV storage bring its global KV component to 890 bytes per token. That's about 89 MB for a 100K-token context, against roughly 31 GB for a classic 70B-class FP16 layout. DeepSeek also keeps that state internally for at least 72 hours.</p>
+<p>I expect OpenAI has done something comparable, co-designing the model and the serving stack so that a day of agent context is cheap enough to sell. OpenAI hasn't said so, and prices can't reveal its storage bill. But "longer and cheaper, only on new models" is the signature you'd expect if the efficiency came from the architecture.</p>
+<h2 id="5-when-the-12-hour-write-pays">5. When the 12-hour write pays</h2>
+<p>A 2.5× write is a bet on coming back. I priced seven agent workflows for one unchanged 100K-token prefix at GPT-6.1 Sol's <a href="https://developers.openai.com/api/docs/pricing">standard rates</a>. Per million tokens, those are $2 input, $2.50 for a <code>30m</code> write, $5 for a <code>12h</code> write and $0.10 for a read. The model applies the documented refresh rules and assumes no reuse beyond each guaranteed minimum.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th style="text-align: right;">Uses</th>
+<th style="text-align: right;">No cache</th>
+<th style="text-align: right;"><code>30m</code></th>
+<th style="text-align: right;"><code>12h</code></th>
+<th>Cheapest</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chatty session, turns 3 min apart</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">$4.00</td>
+<td style="text-align: right;"><strong>$0.44</strong></td>
+<td style="text-align: right;">$0.69</td>
+<td><code>30m</code></td>
+</tr>
+<tr>
+<td>Agent waits 2 h for tests, six times</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">$1.20</td>
+<td style="text-align: right;">$1.50</td>
+<td style="text-align: right;"><strong>$0.55</strong></td>
+<td><code>12h</code></td>
+</tr>
+<tr>
+<td>Returns every 45 min through a working day</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">$2.60</td>
+<td style="text-align: right;">$3.25</td>
+<td style="text-align: right;"><strong>$0.62</strong></td>
+<td><code>12h</code></td>
+</tr>
+<tr>
+<td>Codex-style: three quick turns, back after ~4 h</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">$1.00</td>
+<td style="text-align: right;"><strong>$0.53</strong></td>
+<td style="text-align: right;">$0.54</td>
+<td>tie</td>
+</tr>
+<tr>
+<td>Three turns, back the next morning (15 h)</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">$1.20</td>
+<td style="text-align: right;"><strong>$0.54</strong></td>
+<td style="text-align: right;">$1.04</td>
+<td><code>30m</code></td>
+</tr>
+<tr>
+<td>Daily job, 24 h apart</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;"><strong>$1.00</strong></td>
+<td style="text-align: right;">$1.25</td>
+<td style="text-align: right;">$2.50</td>
+<td>no cache</td>
+</tr>
+<tr>
+<td>Branch cancelled after one call</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;"><strong>$0.20</strong></td>
+<td style="text-align: right;">$0.25</td>
+<td style="text-align: right;">$0.50</td>
+<td>no cache</td>
+</tr>
+</tbody>
+</table></div>
+<figure><a href="assets/scenario-map.png" aria-label="Open figure: Prefix cost across seven agent workflows"><img src="assets/scenario-map.png" alt="Prefix cost across seven agent workflows" loading="lazy" decoding="async"></a><figcaption>Figure 1. Prefix-only cost of one unchanged 100K-token prefix across seven workflows, at GPT-6.1 Sol standard rates on 24 October 2026. Calculated from documented prices and refresh rules; not an API benchmark.</figcaption></figure>
+<p>No option dominates; the shape of the waiting decides. It reduces to one rule:</p>
+<blockquote>
+<p><strong>The two-return rule: buy <code>12h</code> when you expect at least two returns after a pause of more than 30 minutes, all within 12 hours of the write.</strong></p>
+</blockquote>
+<p>The arithmetic: choosing <code>12h</code> over <code>30m</code> costs an extra 1.25× of the prefix up front. Under <code>30m</code>, each return after a long pause pays a fresh 1.25× write instead of a 0.05× read, so 1.2× more. One long return almost pays back the difference; two clearly do. A gap beyond 12 hours defeats both.</p>
+<p>Against no caching at all, the <code>12h</code> write pays once expected reuse exceeds about 1.6: precisely (2.5 − 1) / (1 − 0.05) = 1.58 on Sol, and 1.67 at the usual 0.1× read.</p>
+<p>The Codex-style row is the telling one. Resuming after a few hours is roughly break-even on the API. Inside Codex, Tibo says it now carries no penalty at all.</p>
+<h2 id="6-twelve-hours-is-not-a-rolling-lease">6. Twelve hours is not a rolling lease</h2>
+<p>Two documented rules surprise anyone picturing a self-renewing 12-hour lease:</p>
+<ul>
+<li>A <code>30m</code> read on a <code>12h</code> entry "preserves the later of the existing expiry and 30 minutes after the read. It does not restart a 12-hour clock."</li>
+<li>"Upgrading valid 30-minute coverage to 12 hours charges a new 12-hour write for those tokens, without credit for the earlier write."</li>
+</ul>
+<figure><a href="assets/retention-timeline.png" aria-label="Open figure: Timelines showing short reads and lifetime upgrades"><img src="assets/retention-timeline.png" alt="Timelines showing short reads and lifetime upgrades" loading="lazy" decoding="async"></a><figcaption>Figure 2. Documented pricing coverage, not measured residence in GPU memory. A 30-minute read does not restart the 12-hour clock; upgrading buys a new 12-hour write.</figcaption></figure>
+<p>One gap: the guide doesn't say whether a <code>12h</code> read restarts the 12-hour clock. None of the scenarios above depend on it, but a multi-day agent would. It's the first thing I'd ask OpenAI to document.</p>
+<h2 id="7-the-next-miss-is-self-inflicted">7. The next miss is self-inflicted</h2>
+<p>With long pauses covered, the remaining misses come from the application. Reuse "requires the entire rendered prefix to match." Reordering tools, editing an early message or compacting the conversation breaks it, however long the lifetime you bought.</p>
+<p>OpenAI's guidance points the same way:
+- Keep tool definitions stable. Use <code>allowed_tools</code> or <code>tool_choice: none</code> instead of removing tools.
+- Append new instructions near the end instead of rewriting the start.
+- Use the <a href="https://developers.openai.com/api/docs/guides/prompt-caching/diagnostics">cache diagnostics</a>, which return reasons such as <code>tools_changed</code>.</p>
+<p>The client's question has moved. In Article 001 it was <em>when to refresh</em>; now it's <em>how not to change the prefix</em>. Some of the keep-alive machinery I simulated last time is simply no longer needed, which is the right outcome.</p>
+<h2 id="8-what-ill-test-next">8. What I'll test next</h2>
+<ul>
+<li><strong>Bills, not counters.</strong> Run the seven workflows on the live API with <code>30m</code>, <code>12h</code> and a mix (<code>12h</code> on stable instructions, <code>30m</code> on the evolving tail). Record billed writes, cached tokens and time to first token.</li>
+<li><strong>The refresh question.</strong> Does a <code>12h</code> read extend the clock? Two requests 13 hours apart will answer it.</li>
+<li><strong>Codex "forever".</strong> Resume a large Codex thread after 1, 4 and 24 hours and compare usage.</li>
+<li><strong>Change versus expiry.</strong> In a real agent loop, measure what share of misses come from prefix changes rather than waiting.</li>
+</ul>
+<p>None of these have been run yet; the table is arithmetic on documented prices and rules. If you've measured any of this, I'd like to compare notes.</p>
+<h2 id="sources-and-scope">Sources and scope</h2>
+<p>Documentation, prices and posts were checked on 24 October 2026:
+- <a href="https://developers.openai.com/api/docs/guides/prompt-caching">Prompt caching guide</a>
+- <a href="https://developers.openai.com/api/docs/pricing">API pricing</a>
+- <a href="https://developers.openai.com/api/docs/changelog#october-2026">Changelog, October 2026</a>
+- <a href="https://openai.com/index/better-prompt-caching-for-gpt-6/">Better prompt caching for GPT-6</a>, 22 September
+- <a href="https://x.com/thsottiaux/status/2112712984644784534">Tibo Sottiaux's Day 16 post</a>
+- <a href="https://arxiv.org/abs/2609.19969">DeepSeek V4.1-Flash report</a></p>
+<p>Prices are GPT-6.1 Sol standard short-context rates (up to 272K input tokens). Costs cover the reused prefix only: no output, new input, tools or retries. Section 4's reading of OpenAI's architecture is my inference; OpenAI has not published it. The Codex &amp; Work claim is a staff post, not documentation. The <a href="analysis/inputs.json">calculation inputs</a> and <a href="analysis/costs.csv">scenario costs</a> are published alongside this article.</p>
+<p><em>Views are my own.</em></p><nav class="pager" aria-label="More articles"><a class="prev" href="/articles/001-agent-cache-economics/"><small>Previous</small>← 001 · The 88-Hour Cache Problem: KV Retention Economics for Agent Swarms</a></nav><footer class="footer">ArticleLog 002 · 24 October 2026. Documentation, prices and posts checked on publication day; costs are calculated, not measured. <a href="article.md">Read the Markdown source</a> · <a href="https://github.com/dineshdivi2/dineshdivi2.github.io">Site source</a></footer></main></body></html>

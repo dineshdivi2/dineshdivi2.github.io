@@ -1,7 +1,7 @@
 {
   "series": "ArticleLog",
-  "published_count": 1,
-  "next_number": 2,
+  "published_count": 2,
+  "next_number": 3,
   "entries": [
     {
       "number": 1,
@@ -9,6 +9,12 @@
       "published_at": "2026-10-16",
       "url": "https://dineshdivi2.github.io/articles/001-agent-cache-economics/",
       "repository_url": "https://github.com/dineshdivi2/swarm-kv-economics"
+    },
+    {
+      "number": 2,
+      "title": "30 Minutes, 12 Hours, Forever: Decoding OpenAI's Three Cache Promises",
+      "published_at": "2026-10-24",
+      "url": "https://dineshdivi2.github.io/articles/002-openai-cache-promises/"
     }
   ]
 }

@@ -1,0 +1,39 @@
+{
+  "as_of": "2026-10-24",
+  "model": "gpt-6.1-sol",
+  "tier": "standard, short-context pricing (up to 272K input tokens)",
+  "source": "https://developers.openai.com/api/docs/pricing",
+  "rules_source": "https://developers.openai.com/api/docs/guides/prompt-caching#cache-lifetime",
+  "prefix_tokens": 100000,
+  "usd_per_million": {
+    "uncached": 2.0,
+    "write_30m": 2.5,
+    "write_12h": 5.0,
+    "read": 0.1
+  },
+  "scenarios": [
+    {"name": "Chatty session, turns 3 min apart", "every_minutes": 3, "count": 20},
+    {"name": "Agent waits 2 h for tests, six times", "hours": [0, 2, 4, 6, 8, 10]},
+    {"name": "Returns every 45 min through a working day", "every_minutes": 45, "count": 13},
+    {"name": "Codex-style: three quick turns, back after ~4 h", "hours": [0, 0.1667, 0.3333, 4.3333, 4.5]},
+    {"name": "Three turns, then back the next morning (15 h)", "hours": [0, 0.25, 0.5, 15.5, 15.75, 16]},
+    {"name": "Daily job, 24 h apart", "hours": [0, 24, 48, 72, 96]},
+    {"name": "Branch cancelled after one call", "hours": [0]}
+  ],
+  "assumptions": [
+    "One identical 100000-token prefix on each request; request stays in the standard short-context price band.",
+    "30m: a write or read gives coverage until at least 30 minutes after it (documented refresh rule).",
+    "12h: coverage lasts at least 12 hours after the write. Whether a 12h read restarts the clock is undocumented; both variants are computed and give identical results for these scenarios.",
+    "Every request inside documented coverage is a full-prefix hit; no reuse after the minimum (conservative, not documented eviction).",
+    "No-cache comparator makes no cache writes and receives no cached pricing.",
+    "No prefix growth, maintenance requests, output, tool costs, retries or other application costs.",
+    "No production cache behavior, infrastructure cost or latency was measured."
+  ],
+  "timeline": {
+    "long_write_hour": 0,
+    "short_read_hour": 10,
+    "long_minimum_hours": 12,
+    "short_minimum_hours": 0.5,
+    "upgrade_hour": 0.25
+  }
+}

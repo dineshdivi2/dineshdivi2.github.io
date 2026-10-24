@@ -1,0 +1,8 @@
+scenario,uses,none_usd,30m_usd,12h_usd,12h_read_refresh_usd,cheapest
+"Chatty session, turns 3 min apart",20,4.0,0.44,0.69,0.69,30m
+"Agent waits 2 h for tests, six times",6,1.2,1.5,0.55,0.55,12h
+Returns every 45 min through a working day,13,2.6,3.25,0.62,0.62,12h
+"Codex-style: three quick turns, back after ~4 h",5,1.0,0.53,0.54,0.54,30m / 12h
+"Three turns, then back the next morning (15 h)",6,1.2,0.54,1.04,1.04,30m
+"Daily job, 24 h apart",5,1.0,1.25,2.5,2.5,none
+Branch cancelled after one call,1,0.2,0.25,0.5,0.5,none

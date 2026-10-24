@@ -26,6 +26,14 @@ ASSETS = ARTICLE / 'assets'
 URL = 'https://dineshdivi2.github.io/articles/001-agent-cache-economics/'
 TITLE = 'The 88-Hour Cache Problem: KV Retention Economics for Agent Swarms'
 REPO = 'https://github.com/dineshdivi2/swarm-kv-economics'
+# ArticleLog 002: documentation analysis; figures come from its own calculation script and are stored as files.
+ARTICLE2 = ROOT / 'articles' / '002-openai-cache-promises'
+URL2 = 'https://dineshdivi2.github.io/articles/002-openai-cache-promises/'
+TITLE2 = "30 Minutes, 12 Hours, Forever: Decoding OpenAI's Three Cache Promises"
+DESCRIPTION2 = ('What OpenAI\'s 30-minute, 12-hour and Codex "forever" cache promises actually guarantee, '
+                'what they reveal about the machinery underneath, and the two-return rule for when 12 hours pays.')
+FINDING2 = ('OpenAI\'s prompt cache went from "up to" to "at least". A 12-hour write pays only if you come back '
+            'twice after a 30-minute break. And "forever" in Codex is probably a billing term, not a storage one.')
 BLUE, TEAL, ORANGE, GRAY = '#276ba4', '#137777', '#be562e', '#62717e'
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 10, 'axes.spines.top': False,
                      'axes.spines.right': False, 'axes.titleweight': 'bold', 'axes.titlelocation': 'left',
@@ -143,6 +151,8 @@ CAPTIONS = {
     'essay_c_keepalive_vs_native.png': 'Figure 5. Supplied v3 modeled input-cost reductions. Synthetic bars show three-seed ranges; replay bars show 90% session-bootstrap intervals. Retrospective feature labels limit replay interpretation.',
     'essay_d_guarantee_vs_keepalive.png': 'Figure 6. Supplied replay results against each panel’s passive TTL. The 72-hour guarantee and its one-hour write tariff are hypothetical. Error bars condition on model and extraction assumptions.',
     'essay_e_deepseek_bracket.png': 'Figure 7. Assumed retention curves and tariffs at the modeled peak rates. The guarantee case assumes 1% in-lifetime loss. No live API retention experiment was run.',
+    'scenario-map.png': 'Figure 1. Prefix-only cost of one unchanged 100K-token prefix across seven workflows, at GPT-6.1 Sol standard rates on 24 October 2026. Calculated from documented prices and refresh rules; not an API benchmark.',
+    'retention-timeline.png': 'Figure 2. Documented pricing coverage, not measured residence in GPU memory. A 30-minute read does not restart the 12-hour clock; upgrading buys a new 12-hour write.',
 }
 
 CSS = '''
@@ -251,11 +261,9 @@ def icon():
     plt.close(fig)
 
 
-def build():
-    if '--pages-only' not in sys.argv:
-        figures()
-    md = (ARTICLE / 'article.md').read_text(encoding='utf-8')
-    assert md.splitlines()[0] == '# ' + TITLE
+def render_article(folder, title, kicker, date_iso, date_text, label, figure_count, footer, pager):
+    md = (folder / 'article.md').read_text(encoding='utf-8')
+    assert md.splitlines()[0] == '# ' + title
     body = markdown.markdown(md, extensions=['tables', 'toc', 'sane_lists'])
     def image(match):
         alt, src = match.groups()
@@ -264,34 +272,54 @@ def build():
     body = re.sub(r'<p><img alt="([^"]*)" src="([^"]+)"\s*/?></p>', image, body)
     body = re.sub(r'(<table>.*?</table>)', r'<div class="table-wrap">\1</div>', body, flags=re.S)
     heads = re.findall(r'<h2 id="([^"]+)">(.*?)</h2>', body)
-    toc = ''.join(f'<a href="#{ident}">{label}</a>' for ident, label in heads)
+    toc = ''.join(f'<a href="#{ident}">{label_}</a>' for ident, label_ in heads)
     words = len(re.sub('<[^>]+>', ' ', body).split())
-    meta = f'<div class="kicker">ArticleLog 001 · Systems &amp; agents</div><div class="meta"><span>By Dinesh</span><time datetime="2026-10-16">16 October 2026</time><span>{round(words/230)} min read · 7 figures</span><span>Exploratory simulation</span></div>'
+    meta = f'<div class="kicker">{kicker}</div><div class="meta"><span>By Dinesh</span><time datetime="{date_iso}">{date_text}</time><span>{round(words/230)} min read · {figure_count} figures</span><span>{label}</span></div>'
     toc_html = f'<details class="contents"><summary>In this article</summary><nav>{toc}</nav></details>'
     h1end = body.index('</h1>') + len('</h1>')
     body = meta + body[:h1end] + toc_html + body[h1end:]
-    body += '<footer class="footer">ArticleLog 001 · Publication edition, 16 October 2026. Figures rebuilt from supplied v3 aggregates with corrected labels. <a href="article.md">Read the Markdown source</a> · <a href="https://github.com/dineshdivi2/dineshdivi2.github.io">Site source</a></footer>'
+    body += f'<nav class="pager" aria-label="More articles">{pager}</nav>' + footer
+    return body, words
+
+
+def build():
+    if '--pages-only' not in sys.argv:
+        figures()
+    pager1 = f'<a class="next" href="/articles/002-openai-cache-promises/"><small>Next</small>002 · {html.escape(TITLE2)} →</a>'
+    pager2 = f'<a class="prev" href="/articles/001-agent-cache-economics/"><small>Previous</small>← 001 · {html.escape(TITLE)}</a>'
+    body, words = render_article(ARTICLE, TITLE, 'ArticleLog 001 · Systems &amp; agents', '2026-10-16', '16 October 2026',
+        'Exploratory simulation', 7,
+        '<footer class="footer">ArticleLog 001 · Publication edition, 16 October 2026. Figures rebuilt from supplied v3 aggregates with corrected labels. <a href="article.md">Read the Markdown source</a> · <a href="https://github.com/dineshdivi2/dineshdivi2.github.io">Site source</a></footer>',
+        pager1)
     description = 'Why long-running agents lose their cache, not their history—and when keeping it warm is worth paying for. An exploratory simulation with public coding-agent traces.'
     (ARTICLE / 'index.html').write_text(page(TITLE, body, URL, description, True, section='articles'), encoding='utf-8')
+    body2, words2 = render_article(ARTICLE2, TITLE2, 'ArticleLog 002 · Systems &amp; agents', '2026-10-24', '24 October 2026',
+        'Documentation analysis', 2,
+        '<footer class="footer">ArticleLog 002 · 24 October 2026. Documentation, prices and posts checked on publication day; costs are calculated, not measured. <a href="article.md">Read the Markdown source</a> · <a href="https://github.com/dineshdivi2/dineshdivi2.github.io">Site source</a></footer>',
+        pager2)
+    (ARTICLE2 / 'index.html').write_text(page(TITLE2, body2, URL2, DESCRIPTION2, True, section='articles', card='002-openai-cache-promises'), encoding='utf-8')
+    share_card('002-openai-cache-promises', 'ArticleLog 002', '30 Minutes, 12 Hours,\nForever', "Decoding OpenAI's three cache promises, and when the 12-hour write actually pays.", 'Documentation analysis')
     article_item = f'''<article class="item"><div class="item-meta"><span>ArticleLog 001</span><time datetime="2026-10-16">16 October 2026</time><span class="badge">Exploratory simulation</span></div>
     <TAG><a href="/articles/001-agent-cache-economics/">{html.escape(TITLE)}</a></TAG><p>{description}</p></article>'''
+    article_item2 = f'''<article class="item"><div class="item-meta"><span>ArticleLog 002</span><time datetime="2026-10-24">24 October 2026</time><span class="badge">Documentation analysis</span></div>
+    <TAG><a href="/articles/002-openai-cache-promises/">{html.escape(TITLE2)}</a></TAG><p>{html.escape(DESCRIPTION2)}</p></article>'''
     index_body = f'''<div class="kicker">Dinesh · Technical writing</div><h1>ArticleLog</h1><p>Investigations into AI systems, agent workflows and the costs behind them.</p>
-    <p class="meta">1 published article · Next entry: 002</p><div class="items">{article_item.replace('TAG', 'h2')}</div>'''
+    <p class="meta">2 published articles · Next entry: 003</p><div class="items">{article_item2.replace('TAG', 'h2')}{article_item.replace('TAG', 'h2')}</div>'''
     (ROOT / 'articles/index.html').write_text(page('ArticleLog', index_body, SITE + '/articles/', 'Technical articles by Dinesh.', section='articles', card='articles'), encoding='utf-8')
     builds = build_logs()
     home_description = 'Working notes on AI systems by Dinesh: long-form investigations, plus small product sketches built along the way.'
-    feature = f'''<article class="feature"><div><div class="item-meta"><span>ArticleLog 001</span><time datetime="2026-10-16">16 Oct 2026</time><span class="badge">Exploratory simulation</span></div>
-    <h3><a href="/articles/001-agent-cache-economics/">{html.escape(TITLE)}</a></h3>
-    <p class="finding">Your agent remembers the whole conversation. The provider's cache forgot it an hour ago, and you pay to rebuild it. Whether that's worth fixing depends on how the agent waits.</p>
-    <div class="chips"><span class="chip">{round(words/230)} min read</span><span class="chip">7 figures</span><span class="chip">1.0M trace calls</span><span class="chip">Reproducible repo</span></div>
-    <p><a class="read" href="/articles/001-agent-cache-economics/">Read the investigation →</a></p></div>
-    <figure><a href="/articles/001-agent-cache-economics/" tabindex="-1" aria-hidden="true"><img src="/articles/001-agent-cache-economics/assets/v3_1_measured_survival.png" alt="" loading="lazy"></a></figure></article>'''
+    feature = f'''<article class="feature"><div><div class="item-meta"><span>ArticleLog 002</span><time datetime="2026-10-24">24 Oct 2026</time><span class="badge">Documentation analysis</span></div>
+    <h3><a href="/articles/002-openai-cache-promises/">{html.escape(TITLE2)}</a></h3>
+    <p class="finding">{html.escape(FINDING2)}</p>
+    <div class="chips"><span class="chip">{round(words2/230)} min read</span><span class="chip">2 figures</span><span class="chip">7 workflows priced</span><span class="chip">Sourced to OpenAI docs</span></div>
+    <p><a class="read" href="/articles/002-openai-cache-promises/">Read the analysis →</a></p></div>
+    <figure><a href="/articles/002-openai-cache-promises/" tabindex="-1" aria-hidden="true"><img src="/articles/002-openai-cache-promises/assets/scenario-map.png" alt="" loading="lazy"></a></figure></article>'''
     home = f'''<header class="hero"><div class="kicker">Dinesh · Working notes</div><h1>Building things, writing down what I <em>learn</em>.</h1>
     <p class="lede">Mostly AI systems. When something doesn't add up, I keep digging until it does, then write it down. Now and then I build the thing I wished existed.</p>
-    <span class="now"><span class="dot" aria-hidden="true"></span><span><b>Now writing:</b> ArticleLog 002, on what changes when a cache comes with a promise</span></span></header>
+    <span class="now"><span class="dot" aria-hidden="true"></span><span><b>Just published:</b> ArticleLog 002, on what changes when a cache comes with a promise</span></span></header>
     <section aria-labelledby="articlelog"><div class="section-head"><h2 id="articlelog">ArticleLog</h2><a href="/articles/">All articles →</a></div>
     <p>Small things I noticed and followed further than I meant to. Measured where I could, labelled where I couldn't.</p>{feature}
-    <div class="next-entry"><b>002</b><span>In progress: a prompt cache used to be "best effort". What happens when it becomes a promise?</span></div>
+    <div class="items">{article_item.replace('TAG', 'h3')}</div>
     <p class="labels"><span><i></i>Every entry carries an evidence label</span><span>Exploratory · Measured · Documentation analysis · Opinion</span></p></section>
     <section aria-labelledby="buildlog"><div class="section-head"><h2 id="buildlog">BuildLog</h2><a href="/builds/">All sketches →</a></div>
     <p>Things I wished existed, so I built a rough version. Rough on purpose. Mostly.</p><div class="sketches">{''.join(sketch(e) for e in builds)}</div></section>
@@ -300,8 +328,10 @@ def build():
     share_card('home', 'Dinesh · Working notes', 'Building things, writing\ndown what I learn.', home_description)
     share_card('articles', 'Dinesh · Technical writing', 'ArticleLog', 'Investigations into AI systems, agent workflows and the costs behind them.')
     icon()
-    (ROOT / 'articles/index.json').write_text(json.dumps({'series':'ArticleLog','published_count':1,'next_number':2,'entries':[{'number':1,'title':TITLE,'published_at':'2026-10-16','url':URL,'repository_url':REPO}]},indent=2),encoding='utf-8')
-    print(json.dumps({'article':str(ARTICLE/'index.html'),'figures':len(CAPTIONS),'words':words,'title':TITLE}))
+    (ROOT / 'articles/index.json').write_text(json.dumps({'series':'ArticleLog','published_count':2,'next_number':3,'entries':[
+        {'number':1,'title':TITLE,'published_at':'2026-10-16','url':URL,'repository_url':REPO},
+        {'number':2,'title':TITLE2,'published_at':'2026-10-24','url':URL2}]},indent=2),encoding='utf-8')
+    print(json.dumps({'articles':[str(ARTICLE/'index.html'), str(ARTICLE2/'index.html')],'figures':len(CAPTIONS),'words':[words, words2]}))
 
 
 X_ICON = ('<svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>')
